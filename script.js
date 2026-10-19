@@ -75,18 +75,19 @@
     context.globalAlpha = twinkle;
     context.shadowColor = star.colors.edge;
     context.shadowBlur = star.held ? 30 : 17;
-    if (star.trail.length > 1) {
-      const tail = star.trail[star.trail.length - 1];
+    const visibleTrail = star.launched || star.held ? star.trail : star.trail.slice(0, 4);
+    if (visibleTrail.length > 1) {
+      const tail = visibleTrail[visibleTrail.length - 1];
       const trailGradient = context.createLinearGradient(star.x, star.y, tail.x, tail.y);
       trailGradient.addColorStop(0, star.colors.tail);
       trailGradient.addColorStop(1, "rgba(130, 170, 255, 0)");
       context.beginPath();
       context.moveTo(star.x, star.y);
-      for (let i = 0; i < star.trail.length; i += 1) {
-        context.lineTo(star.trail[i].x, star.trail[i].y);
+      for (let i = 0; i < visibleTrail.length; i += 1) {
+        context.lineTo(visibleTrail[i].x, visibleTrail[i].y);
       }
       context.strokeStyle = star.held ? star.colors.tail : trailGradient;
-      context.lineWidth = star.held ? r * 1.2 : r * 0.85;
+      context.lineWidth = star.held ? r * 1.2 : star.launched ? r * 0.85 : r * 0.45;
       context.lineCap = "round";
       context.stroke();
     }
@@ -142,6 +143,8 @@
           second.x += nx * overlap;
           second.y += ny * overlap;
         }
+        if (firstMoves) first.trail.length = 0;
+        if (secondMoves) second.trail.length = 0;
 
         const firstVx = first.launched ? first.vx : firstMoves ? first.drift : 0;
         const firstVy = first.launched ? first.vy : firstMoves ? first.speed : 0;
