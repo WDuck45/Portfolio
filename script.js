@@ -29,7 +29,7 @@
       vy: 0,
       trail: [],
       launched: false,
-      ambientMover: stars.filter((star) => star.ambientMover).length < 5,
+      ambientMover: stars.filter((star) => star.ambientMover).length < 7,
       phase: Math.random() * Math.PI * 2,
       colors: palette[Math.floor(Math.random() * palette.length)],
       held: false,
@@ -91,6 +91,74 @@
     context.restore();
   }
 
+  function resolveCollisions() {
+    for (let i = 0; i < stars.length; i += 1) {
+      const first = stars[i];
+      if (first.held) continue;
+      for (let j = i + 1; j < stars.length; j += 1) {
+        const second = stars[j];
+        if (second.held) continue;
+
+        const firstMoves = first.launched || first.ambientMover;
+        const secondMoves = second.launched || second.ambientMover;
+        if (!firstMoves && !secondMoves) continue;
+
+        const dx = second.x - first.x;
+        const dy = second.y - first.y;
+        const distance = Math.hypot(dx, dy);
+        const minDistance = (first.radius + second.radius) * 1.6;
+        if (distance === 0 || distance >= minDistance) continue;
+
+        const nx = dx / distance;
+        const ny = dy / distance;
+        const overlap = minDistance - distance;
+        if (firstMoves && secondMoves) {
+          first.x -= nx * overlap * 0.5;
+          first.y -= ny * overlap * 0.5;
+          second.x += nx * overlap * 0.5;
+          second.y += ny * overlap * 0.5;
+        } else if (firstMoves) {
+          first.x -= nx * overlap;
+          first.y -= ny * overlap;
+        } else {
+          second.x += nx * overlap;
+          second.y += ny * overlap;
+        }
+
+        const firstVx = first.launched ? first.vx : firstMoves ? first.drift : 0;
+        const firstVy = first.launched ? first.vy : firstMoves ? first.speed : 0;
+        const secondVx = second.launched ? second.vx : secondMoves ? second.drift : 0;
+        const secondVy = second.launched ? second.vy : secondMoves ? second.speed : 0;
+        const closingSpeed = (firstVx - secondVx) * nx + (firstVy - secondVy) * ny;
+        if (closingSpeed <= 0) continue;
+
+        const impulse = firstMoves && secondMoves ? closingSpeed : closingSpeed * 2;
+        if (firstMoves) {
+          const vx = firstVx - impulse * nx;
+          const vy = firstVy - impulse * ny;
+          if (first.launched) {
+            first.vx = vx;
+            first.vy = vy;
+          } else {
+            first.drift = vx;
+            first.speed = vy;
+          }
+        }
+        if (secondMoves) {
+          const vx = secondVx + impulse * nx;
+          const vy = secondVy + impulse * ny;
+          if (second.launched) {
+            second.vx = vx;
+            second.vy = vy;
+          } else {
+            second.drift = vx;
+            second.speed = vy;
+          }
+        }
+      }
+    }
+  }
+
   function frame(time) {
     context.clearRect(0, 0, width, height);
     for (let i = stars.length - 1; i >= 0; i -= 1) {
@@ -127,6 +195,7 @@
       }
       drawStar(star, time);
     }
+    resolveCollisions();
     while (stars.length < targetCount) stars.push(makeStar());
     animationFrame = window.requestAnimationFrame(frame);
   }
