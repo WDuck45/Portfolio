@@ -24,7 +24,7 @@
       y: randomY ? Math.random() * height : -10,
       radius,
       speed: 0.65 + Math.random() * 0.55,
-      drift: (Math.random() - 0.5) * 0.2,
+      drift: (Math.random() - 0.5) * 0.55,
       vx: 0,
       vy: 0,
       trail: [],
@@ -75,7 +75,7 @@
     context.globalAlpha = twinkle;
     context.shadowColor = star.colors.edge;
     context.shadowBlur = star.held ? 30 : 17;
-    const visibleTrail = star.launched || star.held ? star.trail : star.trail.slice(0, 4);
+    const visibleTrail = star.trail;
     if (visibleTrail.length > 1) {
       const tail = visibleTrail[visibleTrail.length - 1];
       const trailGradient = context.createLinearGradient(star.x, star.y, tail.x, tail.y);
@@ -87,7 +87,7 @@
         context.lineTo(visibleTrail[i].x, visibleTrail[i].y);
       }
       context.strokeStyle = star.held ? star.colors.tail : trailGradient;
-      context.lineWidth = star.held ? r * 1.2 : star.launched ? r * 0.85 : r * 0.45;
+      context.lineWidth = star.held ? r * 1.2 : r * 0.85;
       context.lineCap = "round";
       context.stroke();
     }
@@ -206,8 +206,14 @@
           star.x = Math.random() * width;
           star.trail.length = 0;
         }
-        if (star.x < -24) star.x = width + 24;
-        if (star.x > width + 24) star.x = -24;
+        if (star.x < -24) {
+          star.x = width + 24;
+          star.trail.length = 0;
+        }
+        if (star.x > width + 24) {
+          star.x = -24;
+          star.trail.length = 0;
+        }
       }
       if (star.trail.length === 0 || Math.hypot(star.x - star.trail[0].x, star.y - star.trail[0].y) > 2) {
         star.trail.unshift({ x: star.x, y: star.y });
