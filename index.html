@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080d19" />
+    <meta name="description" content="A student portfolio for a Computer Science and Engineering student at VIT Vellore." />
+    <title>Akarsh Shaurya — Computer Science Student</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <canvas class="starfield" id="starfield" aria-hidden="true"></canvas>
+    <header class="site-header">
+      <a class="wordmark" href="#home" aria-label="Akarsh Shaurya, home">YN<span>.</span></a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#about">About</a>
+        <a href="#education">Education</a>
+        <a href="#work">Projects</a>
+        <a href="#skills">Skills</a>
+        <a href="#beyond-code">Beyond code</a>
+      </nav>
+      <a class="header-contact" href="#contact">Let’s connect <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main>
+      <section class="hero section-wrap" id="home">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="status-dot"></span> Computer Science &amp; Engineering · VIT Vellore</p>
+          <h1>A curious man in this<br /><span>fascinating World</span></h1>
+          <p class="hero-intro">I’m <strong>Akarsh Shaurya</strong>, a first-year CSE student at VIT Vellore. I’m exploring backend development with Python, building with FastAPI, and learning how databases support useful applications.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#work">Explore my work <span aria-hidden="true">↓</span></a>
+            <a class="text-link" href="#about">A little about me <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="hero-facts" aria-label="Quick facts">
+            <span>First year, VIT Vellore</span>
+            <span>Expected graduation: July 2030</span>
+            <span>Learning through exploring</span>
+          </div>
+        </div>
+        <a class="scroll-cue" href="#about"><span></span> Scroll to explore</a>
+      </section>
+
+      <section class="content-section section-wrap" id="about">
+        <div class="section-heading">
+          <p class="eyebrow">INTRODUCTION</p>
+          <h2>A little about me</h2>
+        </div>
+        <div class="about-grid">
+          <p class="about-lede">My first year at VIT is where I’m starting to connect computer science foundations with the way real apps are put together.</p>
+          <div class="about-detail">
+            <p>That has taken me from FastAPI backend work to MySQL tables: I contributed to SmartSplit AI’s backend and database, and created data storage for profiles, education, and connections in a networking app.</p>
+            <p>I’m still early in the journey, so I’m focused on strengthening my fundamentals and becoming a more confident developer and teammate with each project.</p>
+            <div class="chip-row"><span>Backend development</span><span>Databases</span><span>Team projects</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section section-wrap" id="education">
+        <div class="section-heading">
+          <p class="eyebrow">ACADEMIC PATH</p>
+          <h2>Learning the foundations</h2>
+        </div>
+        <div class="education-card">
+          <div class="education-mark">VIT</div>
+          <div class="education-main">
+            <p class="card-kicker">EXPECTED JULY 2030 <span>·</span> Vellore, India</p>
+            <h3>B.Tech in Computer Science and Engineering</h3>
+            <p>Vellore Institute of Technology</p>
+          </div>
+          <div class="education-course"><span class="mini-label">COURSEWORK</span><p>Harvard CS50 · programming foundations</p></div>
+        </div>
+      </section>
+
+      <section class="content-section section-wrap" id="work">
+        <div class="section-heading heading-with-note">
+          <div><p class="eyebrow">SELECTED WORK</p><h2>Learning through exploring</h2></div>
+          <p class="section-note">A couple of early team projects. More to come.</p>
+        </div>
+        <article class="project-card project-featured">
+          <div class="project-topline"><span class="project-index">FEATURED PROJECT</span><span class="project-tag">HACKULUS · TEAM PROJECT</span></div>
+          <div class="project-layout">
+            <div>
+              <h3>SmartSplit AI</h3>
+              <p class="project-summary">A shared-expense app concept designed to make group bills easier to organize. People can use receipt or payment screenshots as the starting point for splitting costs.</p>
+            </div>
+            <div class="project-contribution"><span class="mini-label">MY CONTRIBUTION</span><p>Worked on the application backend using FastAPI and its database layer using MySQL, helping connect the app’s features with the data they need.</p></div>
+          </div>
+          <div class="project-footer"><div class="chip-row"><span>FastAPI</span><span>MySQL</span><span>Backend</span></div><a class="project-link" href="https://github.com/WDuck45/SmartSplit-AI" target="_blank" rel="noreferrer">View on GitHub <span aria-hidden="true">↗</span></a></div>
+        </article>
+        <article class="project-card project-secondary">
+          <div class="project-topline"><span class="project-index">TEAM PROJECT</span><span class="project-tag">COLLABORATIVE</span></div>
+          <div class="project-layout">
+            <div><h3>Professional networking app</h3><p class="project-summary">A LinkedIn-style team project centered on member profiles and professional connections.</p></div>
+            <div class="project-contribution"><span class="mini-label">MY CONTRIBUTION</span><p>Created the database storage structure for profiles, education details, and connections, helping organize the information the app is built around.</p></div>
+          </div>
+          <div class="project-footer"><div class="chip-row"><span>Database design</span><span>Team project</span></div><span class="quiet-note">Introductory hackathon project</span></div>
+        </article>
+      </section>
+
+      <section class="content-section section-wrap" id="skills">
+        <div class="section-heading">
+          <p class="eyebrow">TOOLKIT</p>
+          <h2>Tools I’m learning with</h2>
+        </div>
+        <div class="skills-grid">
+          <article class="skill-group"><h3>Backend &amp; databases</h3><p>Python fundamentals and FastAPI for backend work; PostgreSQL and MySQL for relational data.</p></article>
+          <article class="skill-group"><h3>Data &amp; computation</h3><p>NumPy and pandas for working with data, alongside GNU Octave for numerical computing.</p></article>
+          <article class="skill-group"><h3>Design &amp; simulation</h3><p>SolidWorks for 3D CAD and PSpice for circuit simulation and analysis.</p></article>
+        </div>
+        <p class="skills-footnote">I’m continuing to develop these skills through coursework and hands-on projects.</p>
+      </section>
+
+      <section class="content-section section-wrap" id="beyond-code">
+        <div class="section-heading">
+          <p class="eyebrow">BEYOND THE SCREEN</p>
+          <h2>Curiosity outside class</h2>
+        </div>
+        <div class="beyond-grid">
+          <article class="beyond-card"><span class="beyond-icon" aria-hidden="true">✳</span><div><span class="mini-label">OLYMPIADS · 2025</span><h3>NSEC &amp; IOQM</h3><p>Qualified in both examinations. I have my IOQM certificate; I did not advance to the next stage.</p></div></article>
+          <article class="beyond-card"><span class="beyond-icon" aria-hidden="true">⌘</span><div><span class="mini-label">STUDENT COMMUNITIES</span><h3>RoboVITics &amp; AI/ML</h3><p>Member of VIT’s RoboVITics and AI/ML clubs, where I’m building connections with other students interested in technology.</p></div></article>
+          <article class="beyond-card"><span class="beyond-icon" aria-hidden="true">↗</span><div><span class="mini-label">HACKATHONS</span><h3>Learning together</h3><p>Joined two hackathons so far, including Hackulus, and contributed to projects with a team.</p></div></article>
+        </div>
+      </section>
+
+      <section class="contact-section section-wrap" id="contact">
+        <p class="eyebrow">SAY HELLO</p>
+        <h2>Good ideas start<br /><span>with a conversation.</span></h2>
+        <p>Open to learning, collaborating, and meeting people who enjoy building things.</p>
+        <div class="contact-actions"><a class="button button-primary" href="mailto:akarsh.shaurya10@gmail.com">Email me <span aria-hidden="true">↗</span></a><a class="text-link" href="https://github.com/WDuck45" target="_blank" rel="noreferrer">GitHub profile <span aria-hidden="true">↗</span></a></div>
+        <p class="contact-placeholder"></p>
+      </section>
+    </main>
+    <footer class="site-footer section-wrap"><a class="wordmark" href="#home">YN<span>.</span></a><a href="#home">Back to top ↑</a></footer>
+  </body>
+</html>
