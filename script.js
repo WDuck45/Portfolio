@@ -29,7 +29,7 @@
       vy: 0,
       trail: [],
       launched: false,
-      ambientMover: stars.filter((star) => star.ambientMover).length < 7,
+      ambientMover: stars.filter((star) => star.ambientMover && !star.launched && !star.held).length < 7,
       phase: Math.random() * Math.PI * 2,
       colors: palette[Math.floor(Math.random() * palette.length)],
       held: false,
@@ -48,6 +48,24 @@
     targetCount = Math.min(55, Math.max(32, Math.round((width * height) / 16000)));
     while (stars.length < targetCount) stars.push(makeStar());
     while (stars.length > targetCount) stars.pop();
+    ensureAmbientMovers();
+  }
+
+  function ensureAmbientMovers() {
+    let movingCount = stars.filter((star) => star.ambientMover && !star.launched && !star.held).length;
+    for (const star of stars) {
+      if (movingCount >= 7) break;
+      if (!star.ambientMover && !star.launched && !star.held) {
+        star.ambientMover = true;
+        movingCount += 1;
+      }
+    }
+    while (movingCount < 7) {
+      const star = makeStar(false);
+      star.ambientMover = true;
+      stars.push(star);
+      movingCount += 1;
+    }
   }
 
   function drawStar(star, time) {
@@ -133,6 +151,7 @@
         if (closingSpeed <= 0) continue;
 
         const impulse = firstMoves && secondMoves ? closingSpeed : closingSpeed * 2;
+        const deflection = first.phase < second.phase ? -0.75 : 0.75;
         if (firstMoves) {
           const vx = firstVx - impulse * nx;
           const vy = firstVy - impulse * ny;
@@ -140,8 +159,7 @@
             first.vx = vx;
             first.vy = vy;
           } else {
-            first.drift = vx;
-            first.speed = vy;
+            first.drift = Math.max(-0.8, Math.min(0.8, first.drift + deflection));
           }
         }
         if (secondMoves) {
@@ -151,8 +169,7 @@
             second.vx = vx;
             second.vy = vy;
           } else {
-            second.drift = vx;
-            second.speed = vy;
+            second.drift = Math.max(-0.8, Math.min(0.8, second.drift - deflection));
           }
         }
       }
@@ -197,6 +214,7 @@
     }
     resolveCollisions();
     while (stars.length < targetCount) stars.push(makeStar());
+    ensureAmbientMovers();
     animationFrame = window.requestAnimationFrame(frame);
   }
 
@@ -220,6 +238,7 @@
     if (!nearest) return;
     activeStar = nearest;
     activeStar.held = true;
+    activeStar.ambientMover = false;
     pointer = { x, y, lastX: x, lastY: y, lastTime: performance.now() };
     if (event.pointerType === "touch") event.preventDefault();
   }
