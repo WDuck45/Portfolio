@@ -16,6 +16,8 @@
   let activeStar = null;
   let pointer = { x: 0, y: 0, lastX: 0, lastY: 0, lastTime: 0 };
   let animationFrame = 0;
+  let meteor = null;
+  let nextMeteorAt = null;
 
   function makeStar(randomY = true) {
     const radius = 1.9 + Math.random() * 1.6;
@@ -27,6 +29,8 @@
       drift: (Math.random() - 0.5) * 0.55,
       vx: 0,
       vy: 0,
+      collisionMotion: false,
+      collisionSettled: false,
       trail: [],
       launched: false,
       ambientMover: stars.filter((star) => star.ambientMover && !star.launched && !star.held).length < 7,
@@ -55,7 +59,7 @@
     let movingCount = stars.filter((star) => star.ambientMover && !star.launched && !star.held).length;
     for (const star of stars) {
       if (movingCount >= 7) break;
-      if (!star.ambientMover && !star.launched && !star.held) {
+      if (!star.ambientMover && !star.launched && !star.held && !star.collisionSettled) {
         star.ambientMover = true;
         movingCount += 1;
       }
@@ -110,7 +114,7 @@
     context.restore();
   }
 
-  function resolveCollisions() {
+  function resolveCollisions(time) {
     for (let i = 0; i < stars.length; i += 1) {
       const first = stars[i];
       if (first.held) continue;
@@ -146,41 +150,104 @@
         if (firstMoves) first.trail.length = 0;
         if (secondMoves) second.trail.length = 0;
 
-        const firstVx = first.launched ? first.vx : firstMoves ? first.drift : 0;
-        const firstVy = first.launched ? first.vy : firstMoves ? first.speed : 0;
-        const secondVx = second.launched ? second.vx : secondMoves ? second.drift : 0;
-        const secondVy = second.launched ? second.vy : secondMoves ? second.speed : 0;
-        const closingSpeed = (firstVx - secondVx) * nx + (firstVy - secondVy) * ny;
-        if (closingSpeed <= 0) continue;
+        const motionScale = reducedMotion.matches ? 0.55 : 1;
+        const firstVx = first.launched ? first.vx : first.ambientMover
+          ? first.drift + Math.sin(time * 0.00045 + first.phase) * 0.045 * motionScale : 0;
+        const firstVy = first.launched ? first.vy : first.ambientMover
+          ? first.speed + Math.sin(time * 0.00065 + first.phase) * 0.035 * motionScale : 0;
+        const secondVx = second.launched ? second.vx : second.ambientMover
+          ? second.drift + Math.sin(time * 0.00045 + second.phase) * 0.045 * motionScale : 0;
+        const secondVy = second.launched ? second.vy : second.ambientMover
+          ? second.speed + Math.sin(time * 0.00065 + second.phase) * 0.035 * motionScale : 0;
+        const relativeNormal = (secondVx - firstVx) * nx + (secondVy - firstVy) * ny;
+        if (relativeNormal >= 0) continue;
 
-        const impulse = firstMoves && secondMoves ? closingSpeed : closingSpeed * 2;
-        const deflection = first.phase < second.phase ? -0.75 : 0.75;
-        if (firstMoves) {
-          const vx = firstVx - impulse * nx;
-          const vy = firstVy - impulse * ny;
-          if (first.launched) {
-            first.vx = vx;
-            first.vy = vy;
+        const firstMass = first.radius * first.radius;
+        const secondMass = second.radius * second.radius;
+        const restitution = 0.9;
+        const impulse = -(1 + restitution) * relativeNormal / (1 / firstMass + 1 / secondMass);
+        const firstAfterX = firstVx - (impulse / firstMass) * nx;
+        const firstAfterY = firstVy - (impulse / firstMass) * ny;
+        const secondAfterX = secondVx + (impulse / secondMass) * nx;
+        const secondAfterY = secondVy + (impulse / secondMass) * ny;
+
+        for (const [star, vx, vy] of [
+          [first, firstAfterX, firstAfterY],
+          [second, secondAfterX, secondAfterY],
+        ]) {
+          star.ambientMover = false;
+          star.vx = vx;
+          star.vy = vy;
+          star.collisionMotion = true;
+          star.collisionSettled = false;
+          if (Math.hypot(vx, vy) < 0.18) {
+            star.launched = false;
+            star.vx = 0;
+            star.vy = 0;
+            star.collisionMotion = false;
+            star.collisionSettled = true;
           } else {
-            first.drift = Math.max(-0.8, Math.min(0.8, first.drift + deflection));
-          }
-        }
-        if (secondMoves) {
-          const vx = secondVx + impulse * nx;
-          const vy = secondVy + impulse * ny;
-          if (second.launched) {
-            second.vx = vx;
-            second.vy = vy;
-          } else {
-            second.drift = Math.max(-0.8, Math.min(0.8, second.drift - deflection));
+            star.launched = true;
           }
         }
       }
     }
   }
 
+  function drawMeteor(time) {
+    if (reducedMotion.matches) return;
+    if (nextMeteorAt === null) nextMeteorAt = time + 10000 + Math.random() * 8000;
+    if (!meteor && time >= nextMeteorAt) {
+      meteor = {
+        x: Math.random() * width * 0.35,
+        y: Math.random() * height * 0.25,
+        dx: width * 0.85,
+        dy: height * 0.42,
+        startedAt: time,
+        duration: 900 + Math.random() * 350,
+      };
+      nextMeteorAt = time + 18000 + Math.random() * 12000;
+    }
+    if (!meteor) return;
+
+    const progress = (time - meteor.startedAt) / meteor.duration;
+    if (progress >= 1) {
+      meteor = null;
+      return;
+    }
+
+    const x = meteor.x + meteor.dx * progress;
+    const y = meteor.y + meteor.dy * progress;
+    const directionLength = Math.hypot(meteor.dx, meteor.dy);
+    const tailLength = 150;
+    const tailX = x - (meteor.dx / directionLength) * tailLength;
+    const tailY = y - (meteor.dy / directionLength) * tailLength;
+    const fade = Math.sin(Math.PI * progress);
+    context.save();
+    context.globalAlpha = 0.55 * fade;
+    context.shadowColor = "#9bc5ff";
+    context.shadowBlur = 18;
+    const gradient = context.createLinearGradient(x, y, tailX, tailY);
+    gradient.addColorStop(0, "rgba(255,255,255,.95)");
+    gradient.addColorStop(0.2, "rgba(155,197,255,.68)");
+    gradient.addColorStop(1, "rgba(120,160,255,0)");
+    context.strokeStyle = gradient;
+    context.lineWidth = 2;
+    context.lineCap = "round";
+    context.beginPath();
+    context.moveTo(x, y);
+    context.lineTo(tailX, tailY);
+    context.stroke();
+    context.fillStyle = "rgba(255,255,255,.95)";
+    context.beginPath();
+    context.arc(x, y, 2.3, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
+  }
+
   function frame(time) {
     context.clearRect(0, 0, width, height);
+    drawMeteor(time);
     for (let i = stars.length - 1; i >= 0; i -= 1) {
       const star = stars[i];
       if (star.held) {
@@ -189,8 +256,17 @@
       } else if (star.launched) {
         star.x += star.vx;
         star.y += star.vy;
-        star.vx *= 0.999;
-        star.vy *= 0.999;
+        const drag = star.collisionMotion ? 0.992 : 0.999;
+        star.vx *= drag;
+        star.vy *= drag;
+        if (star.collisionMotion && Math.hypot(star.vx, star.vy) < 0.18) {
+          star.launched = false;
+          star.collisionMotion = false;
+          star.collisionSettled = true;
+          star.vx = 0;
+          star.vy = 0;
+          star.trail.length = 0;
+        }
         if (star.x < -24 || star.x > width + 24 || star.y < -24 || star.y > height + 24) {
           stars.splice(i, 1);
           continue;
@@ -221,7 +297,7 @@
       }
       drawStar(star, time);
     }
-    resolveCollisions();
+    resolveCollisions(time);
     while (stars.length < targetCount) stars.push(makeStar());
     ensureAmbientMovers();
     animationFrame = window.requestAnimationFrame(frame);
@@ -248,6 +324,8 @@
     activeStar = nearest;
     activeStar.held = true;
     activeStar.ambientMover = false;
+    activeStar.collisionMotion = false;
+    activeStar.collisionSettled = false;
     pointer = { x, y, lastX: x, lastY: y, lastTime: performance.now() };
     if (event.pointerType === "touch") event.preventDefault();
   }
