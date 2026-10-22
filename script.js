@@ -1,13 +1,179 @@
 (() => {
+  const canvas = document.getElementById("constellation-field");
+  if (!canvas) return;
+  const context = canvas.getContext("2d", { alpha: true });
+  if (!context) return;
+
+  const MAX_PARTICLES = 84;
+  const FORMATION_MS = 90000;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const groups = [
+    {
+      center: [0.2, 0.3], color: [56, 189, 248],
+      points: [[-1, 0], [-.45, -.65], [.2, -.8], [.85, -.35], [.75, .4], [.05, .75], [-.7, .5]],
+      links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [1, 6], [6, 5]],
+    },
+    {
+      center: [0.72, 0.28], color: [167, 139, 250],
+      points: [[-1, -.45], [-.35, -.8], [.35, -.6], [.95, -.05], [.55, .65], [-.2, .85], [-.75, .35]],
+      links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0], [2, 5]],
+    },
+    {
+      center: [0.49, 0.72], color: [125, 211, 252],
+      points: [[-1, -.1], [-.5, -.8], [.1, -.55], [.85, -.7], [.55, .05], [.95, .7], [.1, .8], [-.55, .55]],
+      links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0], [2, 4]],
+    },
+  ];
+  const nodeTargets = [];
+  const edges = [];
+  groups.forEach((group, groupIndex) => {
+    const firstNode = nodeTargets.length;
+    group.points.forEach(([x, y]) => nodeTargets.push({ groupIndex, x, y }));
+    group.links.forEach(([from, to]) => edges.push({ from: firstNode + from, to: firstNode + to, groupIndex }));
+  });
+
+  const particles = Array.from({ length: MAX_PARTICLES }, (_, index) => ({
+    phase: Math.random() * Math.PI * 2,
+    radius: index < nodeTargets.length ? 1 + Math.random() * .45 : .45 + Math.random() * .55,
+    target: index < nodeTargets.length ? nodeTargets[index] : null,
+    startX: 0,
+    startY: 0,
+    targetX: 0,
+    targetY: 0,
+  }));
+  const positions = Array.from({ length: MAX_PARTICLES }, () => ({ x: 0, y: 0 }));
+  let width = 0;
+  let height = 0;
+  let pixelRatio = 1;
+  let activeTime = 0;
+  let previousFrame = 0;
+  let animationFrame = 0;
+  let running = false;
+
+  function resize() {
+    pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.round(width * pixelRatio);
+    canvas.height = Math.round(height * pixelRatio);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+    const scale = Math.min(width, height) * .105;
+    particles.forEach((particle) => {
+      particle.startX = Math.random() * width;
+      particle.startY = Math.random() * height;
+      if (particle.target) {
+        const group = groups[particle.target.groupIndex];
+        particle.targetX = Math.max(20, Math.min(width - 20, group.center[0] * width + particle.target.x * scale));
+        particle.targetY = Math.max(20, Math.min(height - 20, group.center[1] * height + particle.target.y * scale));
+      }
+    });
+    draw();
+  }
+
+  function draw() {
+    context.clearRect(0, 0, width, height);
+    const progress = reducedMotion.matches ? 1 : Math.min(activeTime / FORMATION_MS, 1);
+    const eased = progress * progress * (3 - 2 * progress);
+    const driftAmount = 13 * (1 - eased * .72);
+
+    particles.forEach((particle, index) => {
+      const t = activeTime * .00018 + particle.phase;
+      const target = particle.target;
+      positions[index].x = target
+        ? particle.startX + (particle.targetX - particle.startX) * eased + Math.sin(t) * driftAmount * .4
+        : particle.startX + Math.sin(t) * driftAmount;
+      positions[index].y = target
+        ? particle.startY + (particle.targetY - particle.startY) * eased + Math.cos(t * .83) * driftAmount * .4
+        : particle.startY + Math.cos(t * .83) * driftAmount;
+    });
+
+    if (progress > .025) {
+      groups.forEach((group, groupIndex) => {
+        context.beginPath();
+        edges.forEach((edge) => {
+          if (edge.groupIndex !== groupIndex) return;
+          const from = positions[edge.from];
+          const to = positions[edge.to];
+          context.moveTo(from.x, from.y);
+          context.lineTo(to.x, to.y);
+        });
+        context.strokeStyle = `rgba(${group.color.join(",")},${.16 * eased})`;
+        context.lineWidth = .7;
+        context.stroke();
+      });
+    }
+
+    particles.forEach((particle, index) => {
+      const position = positions[index];
+      const twinkle = .55 + (Math.sin(activeTime * .001 + particle.phase) + 1) * .16;
+      context.globalAlpha = particle.target ? twinkle * (.28 + eased * .52) : twinkle * .35;
+      context.beginPath();
+      context.arc(position.x, position.y, particle.radius, 0, Math.PI * 2);
+      context.fillStyle = particle.target
+        ? (particle.target.groupIndex === 1 ? "#ddd2ff" : "#d8f5ff")
+        : "#c8d8f5";
+      context.fill();
+    });
+    context.globalAlpha = 1;
+  }
+
+  function frame(now) {
+    if (!running) return;
+    if (previousFrame) activeTime += Math.min(now - previousFrame, 50);
+    previousFrame = now;
+    draw();
+    animationFrame = window.requestAnimationFrame(frame);
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    previousFrame = 0;
+    if (reducedMotion.matches) {
+      draw();
+      return;
+    }
+    animationFrame = window.requestAnimationFrame(frame);
+  }
+
+  function stop() {
+    running = false;
+    previousFrame = 0;
+    if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    animationFrame = 0;
+  }
+
+  function handleVisibility() {
+    if (document.hidden) stop();
+    else start();
+  }
+
+  function handleMotionPreference() {
+    stop();
+    if (reducedMotion.matches) draw();
+    else start();
+  }
+
+  resize();
+  window.addEventListener("resize", resize, { passive: true });
+  document.addEventListener("visibilitychange", handleVisibility);
+  reducedMotion.addEventListener?.("change", handleMotionPreference);
+  if (!document.hidden) start();
+})();
+
+(() => {
   const canvas = document.getElementById("starfield");
   const context = canvas.getContext("2d", { alpha: true });
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const stars = [];
   const palette = [
-    { core: "#ffffff", mid: "#c6e0ff", edge: "#568eff", tail: "rgba(113, 167, 255, .45)" },
-    { core: "#ffffff", mid: "#d5c9ff", edge: "#8970f5", tail: "rgba(157, 136, 255, .42)" },
-    { core: "#ffffff", mid: "#bff3ff", edge: "#35b6df", tail: "rgba(88, 218, 255, .4)" },
-    { core: "#ffffff", mid: "#ffd6ef", edge: "#d37db5", tail: "rgba(225, 137, 193, .4)" },
+    { core: "#ffffff", mid: "#dff6ff", edge: "#38bdf8", tail: "rgba(56, 189, 248, .46)" },
+    { core: "#ffffff", mid: "#eee8ff", edge: "#a78bfa", tail: "rgba(167, 139, 250, .44)" },
+    { core: "#ffffff", mid: "#c7f0ff", edge: "#22d3ee", tail: "rgba(34, 211, 238, .4)" },
+    { core: "#ffffff", mid: "#dbeafe", edge: "#818cf8", tail: "rgba(129, 140, 248, .4)" },
   ];
   let width = 0;
   let height = 0;
@@ -225,7 +391,7 @@
     const fade = Math.sin(Math.PI * progress);
     context.save();
     context.globalAlpha = 0.55 * fade;
-    context.shadowColor = "#9bc5ff";
+    context.shadowColor = "#38bdf8";
     context.shadowBlur = 18;
     const gradient = context.createLinearGradient(x, y, tailX, tailY);
     gradient.addColorStop(0, "rgba(255,255,255,.95)");
@@ -356,6 +522,45 @@
     }
     activeStar = null;
   }
+
+  if (!reducedMotion.matches) {
+    window.addEventListener("pointermove", (event) => {
+      document.documentElement.style.setProperty("--pointer-x", `${event.clientX}px`);
+      document.documentElement.style.setProperty("--pointer-y", `${event.clientY}px`);
+    }, { passive: true });
+  }
+
+  document.querySelectorAll(".spotlight-card").forEach((card) => {
+    card.addEventListener("pointermove", (event) => {
+      const bounds = card.getBoundingClientRect();
+      card.style.setProperty("--spot-x", `${event.clientX - bounds.left}px`);
+      card.style.setProperty("--spot-y", `${event.clientY - bounds.top}px`);
+    }, { passive: true });
+  });
+
+  const signalPanel = document.querySelector(".signal-panel");
+  const signalCaption = document.getElementById("signal-caption");
+  const signalFootnote = document.querySelector(".signal-footnote");
+  const signalButtons = document.querySelectorAll("[data-signal-view]");
+  signalButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const mode = button.dataset.signalView;
+      if (!signalPanel || !signalCaption || !signalFootnote) return;
+      signalPanel.dataset.mode = mode;
+      signalButtons.forEach((item) => {
+        const selected = item === button;
+        item.classList.toggle("is-active", selected);
+        item.setAttribute("aria-pressed", String(selected));
+      });
+      if (mode === "model") {
+        signalCaption.textContent = "MODEL PREVIEW · FEATURES → FLAGS";
+        signalFootnote.textContent = "In-development pipeline preview · not an actual model prediction";
+      } else {
+        signalCaption.textContent = "RAW PPG · 30 SECOND WINDOW";
+        signalFootnote.textContent = "Illustrative sample trace · not a medical reading";
+      }
+    });
+  });
 
   resize();
   window.addEventListener("resize", resize, { passive: true });

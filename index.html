@@ -3,18 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#080d19" />
-    <meta name="description" content="A student portfolio for a Computer Science and Engineering student at VIT Vellore." />
+    <meta name="theme-color" content="#030712" />
+    <meta name="description" content="Akarsh Shaurya is a Computer Science student exploring backend engineering, edge AI, and thoughtful product experiences." />
     <title>Akarsh Shaurya — Computer Science Student</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <script src="script.js" defer></script>
   </head>
   <body>
+    <div class="ambient-glow" aria-hidden="true"></div>
+    <canvas class="constellation-field" id="constellation-field" aria-hidden="true"></canvas>
     <canvas class="starfield" id="starfield" aria-hidden="true"></canvas>
     <header class="site-header">
       <a class="wordmark" href="#home" aria-label="Akarsh Shaurya, home">AK<span>.</span></a>
       <nav class="main-nav" aria-label="Main navigation">
-        <a href="#about">About</a>
+        <a href="#lab-bench">Lab bench</a>
         <a href="#education">Education</a>
         <a href="#work">Projects</a>
         <a href="#skills">Skills</a>
@@ -28,10 +33,10 @@
         <div class="hero-copy">
           <p class="eyebrow"><span class="status-dot"></span> Computer Science &amp; Engineering · VIT Vellore</p>
           <h1>A curious man in this<br /><span>fascinating World</span></h1>
-          <p class="hero-intro">I’m <strong>Akarsh Shaurya</strong>, a first-year CSE student at VIT Vellore. I’m exploring backend development with Python, building with FastAPI, and learning how databases support useful applications.</p>
+          <p class="hero-intro">I’m <strong>Akarsh Shaurya</strong>, a first-year CSE student at VIT Vellore, exploring backend engineering with Python, FastAPI, and relational databases. I like untangling how systems fit together—and giving useful ideas a thoughtful, polished experience.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#work">Explore my work <span aria-hidden="true">↓</span></a>
-            <a class="text-link" href="#about">A little about me <span aria-hidden="true">↗</span></a>
+          <a class="text-link" href="#lab-bench">How I think <span aria-hidden="true">↗</span></a>
           </div>
           <div class="hero-facts" aria-label="Quick facts">
             <span>First year, VIT Vellore</span>
@@ -39,21 +44,84 @@
             <span>Learning through exploring</span>
           </div>
         </div>
-        <a class="scroll-cue" href="#about"><span></span> Scroll to explore</a>
+        <aside class="mdp-card" aria-labelledby="mdp-title">
+          <div class="mdp-topline">
+            <span class="live-status"><span class="live-dot"></span> CURRENTLY BUILDING</span>
+            <span class="mdp-period">MULTIDISCIPLINARY PROJECT</span>
+          </div>
+          <h2 id="mdp-title">Edge-AI Wearable for Sleep &amp; Apnea Risk Assessment</h2>
+          <p class="mdp-role">Lead AI &amp; Signal Pipeline Developer</p>
+          <div class="signal-toolbar">
+            <span class="signal-caption" id="signal-caption">RAW PPG · 30 SECOND WINDOW</span>
+            <div class="signal-toggle" role="group" aria-label="Signal visualization mode">
+              <button type="button" class="is-active" data-signal-view="raw" aria-pressed="true">Raw signal</button>
+              <button type="button" data-signal-view="model" aria-pressed="false">Model view</button>
+            </div>
+          </div>
+          <div class="signal-panel" data-mode="raw">
+            <svg class="signal-visual" viewBox="0 0 520 100" role="img" aria-labelledby="signal-title signal-description" preserveAspectRatio="none">
+              <title id="signal-title">Illustrative PPG signal visualization</title>
+              <desc id="signal-description">A decorative sample waveform, not a live medical measurement.</desc>
+              <defs>
+                <linearGradient id="signal-stroke" x1="0" x2="1">
+                    <stop offset="0" stop-color="#38bdf8" />
+                    <stop offset="1" stop-color="#a78bfa" />
+                </linearGradient>
+                <linearGradient id="signal-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#38bdf8" stop-opacity=".18" />
+                    <stop offset="1" stop-color="#38bdf8" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <path class="signal-area" d="M0 56 C18 56 19 53 30 55 S45 59 54 55 C65 50 68 31 77 30 C86 28 88 65 98 68 C110 71 111 53 123 54 S145 58 154 55 C168 51 169 35 179 34 C190 33 192 64 201 67 C211 70 214 55 226 55 S244 57 254 54 C267 50 270 30 280 31 C292 32 293 65 303 68 C313 70 316 54 328 55 S348 59 359 55 C371 51 374 36 384 35 C395 34 397 65 407 67 C419 70 421 54 433 54 S452 57 463 54 C477 50 480 31 490 32 S506 61 520 57 L520 100 L0 100Z" />
+              <path class="signal-path signal-path-raw" d="M0 56 C18 56 19 53 30 55 S45 59 54 55 C65 50 68 31 77 30 C86 28 88 65 98 68 C110 71 111 53 123 54 S145 58 154 55 C168 51 169 35 179 34 C190 33 192 64 201 67 C211 70 214 55 226 55 S244 57 254 54 C267 50 270 30 280 31 C292 32 293 65 303 68 C313 70 316 54 328 55 S348 59 359 55 C371 51 374 36 384 35 C395 34 397 65 407 67 C419 70 421 54 433 54 S452 57 463 54 C477 50 480 31 490 32 S506 61 520 57" />
+              <path class="signal-path signal-path-model" d="M0 71 H78 V31 H102 V67 H179 V35 H204 V66 H280 V32 H306 V68 H384 V36 H410 V67 H490 V34 H520" />
+            </svg>
+            <span class="signal-footnote">Illustrative sample trace · not a medical reading</span>
+          </div>
+          <ul class="mdp-details">
+            <li><span class="detail-marker" aria-hidden="true">✳</span><span>Extracting and fusing 20+ statistical, temporal, and nonlinear features from raw 30-second optical PPG waveforms, including Higuchi Fractal Dimension and Hjorth Complexity.</span></li>
+            <li><span class="detail-marker" aria-hidden="true">✳</span><span>Training explainable Random Forest models with Grid Search CV; the project is targeting ~82%+ accuracy for non-invasive sleep staging and pattern flags.</span></li>
+            <li><span class="detail-marker" aria-hidden="true">✳</span><span>Integrating SHAP (SHapley Additive exPlanations) for clinical interpretability.</span></li>
+          </ul>
+        </aside>
+        <a class="scroll-cue" href="#lab-bench"><span></span> Scroll to explore</a>
       </section>
 
-      <section class="content-section section-wrap" id="about">
+      <section class="content-section section-wrap" id="lab-bench">
         <div class="section-heading">
-          <p class="eyebrow">INTRODUCTION</p>
-          <h2>A little about me</h2>
+          <p class="eyebrow">PERSONALITY / HOW I THINK</p>
+          <h2>The engineering lab bench</h2>
+          <p class="section-note lab-intro">A snapshot of what I build, what I’m curious about, and how I learn with a team.</p>
         </div>
-        <div class="about-grid">
-          <p class="about-lede">My first year at VIT is where I’m starting to connect computer science foundations with the way real apps are put together.</p>
-          <div class="about-detail">
-            <p>That has taken me from FastAPI backend work to MySQL tables: I contributed to SmartSplit AI’s backend and database, and created data storage for profiles, education, and connections in a networking app.</p>
-            <p>I’m still early in the journey, so I’m focused on strengthening my fundamentals and becoming a more confident developer and teammate with each project.</p>
-            <div class="chip-row"><span>Backend development</span><span>Databases</span><span>Team projects</span></div>
-          </div>
+        <div class="lab-bench">
+          <article class="lab-card lab-core">
+            <span class="lab-index">CORE ENGINE</span>
+            <span class="lab-glyph" aria-hidden="true">⌘</span>
+            <h3>Systems that make ideas work</h3>
+            <p>Python and FastAPI backends, paired with MySQL data modeling and query optimization.</p>
+            <div class="chip-row"><span>Python</span><span>FastAPI</span><span>MySQL</span></div>
+          </article>
+          <article class="lab-card lab-diagnostics">
+            <span class="lab-index">DIAGNOSTIC LOG</span>
+            <span class="lab-glyph" aria-hidden="true">⌁</span>
+            <h3>Follow the signal</h3>
+            <p>Debugging connected systems, tracing behavior in the terminal, and working through partial differential equations.</p>
+            <div class="terminal-line"><span aria-hidden="true">›</span> inspect · reason · iterate</div>
+          </article>
+          <article class="lab-card lab-curiosity">
+            <span class="lab-index">CURIOSITY STACK</span>
+            <span class="lab-glyph" aria-hidden="true">◎</span>
+            <h3>Where disciplines meet</h3>
+            <p>Bio-signals, edge AI, and algorithmic chess strategy keep me exploring beyond the usual stack.</p>
+            <div class="chip-row"><span>Signal processing</span><span>Edge AI</span><span>Chess</span></div>
+          </article>
+          <article class="lab-card lab-creative">
+            <span class="lab-index">CREATIVE &amp; CRAFTS</span>
+            <span class="lab-glyph" aria-hidden="true">✳</span>
+            <h3>Precision, with a sense of pacing</h3>
+            <p>I enjoy pairing engineering precision with thoughtful visual rhythm, polished interface states, and motion-aware interactions.</p>
+            <p class="creative-tag"><span>VISUAL &amp; MOTION DESIGN</span> DaVinci Resolve · keyframe animation · spatial storytelling · UI motion</p>
+          </article>
         </div>
       </section>
 
@@ -78,22 +146,22 @@
           <div><p class="eyebrow">SELECTED WORK</p><h2>Learning through exploring</h2></div>
           <p class="section-note">A couple of early team projects. More to come.</p>
         </div>
-        <article class="project-card project-featured">
+        <article class="project-card project-featured spotlight-card">
           <div class="project-topline"><span class="project-index">FEATURED PROJECT</span><span class="project-tag">HACKULUS · TEAM PROJECT</span></div>
           <div class="project-layout">
             <div>
               <h3>SmartSplit AI</h3>
-              <p class="project-summary">A shared-expense app concept designed to make group bills easier to organize. People can use receipt or payment screenshots as the starting point for splitting costs.</p>
+              <p class="project-summary">Splitting a group bill can get messy. SmartSplit AI explores using receipt and payment screenshots to organize shared expenses. I value pairing backend precision with clear visual pacing and polished interaction feedback.</p>
             </div>
-            <div class="project-contribution"><span class="mini-label">MY CONTRIBUTION</span><p>Worked on the application backend using FastAPI and its database layer using MySQL, helping connect the app’s features with the data they need.</p></div>
+            <div class="project-contribution"><span class="mini-label">MY CONTRIBUTION</span><p>Contributed to the backend with FastAPI and the database layer with MySQL.</p></div>
           </div>
           <div class="project-footer"><div class="chip-row"><span>FastAPI</span><span>MySQL</span><span>Backend</span></div><a class="project-link" href="https://github.com/WDuck45/SmartSplit-AI" target="_blank" rel="noreferrer">View on GitHub <span aria-hidden="true">↗</span></a></div>
         </article>
-        <article class="project-card project-secondary">
+        <article class="project-card project-secondary spotlight-card">
           <div class="project-topline"><span class="project-index">TEAM PROJECT</span><span class="project-tag">COLLABORATIVE</span></div>
           <div class="project-layout">
-            <div><h3>Professional networking app</h3><p class="project-summary">A LinkedIn-style team project centered on member profiles and professional connections.</p></div>
-            <div class="project-contribution"><span class="mini-label">MY CONTRIBUTION</span><p>Created the database storage structure for profiles, education details, and connections, helping organize the information the app is built around.</p></div>
+            <div><h3>Professional networking app</h3><p class="project-summary">A LinkedIn-style team project that organizes member profiles and professional connections.</p></div>
+            <div class="project-contribution"><span class="mini-label">MY CONTRIBUTION</span><p>Designed database storage for profiles, education details, and connections.</p></div>
           </div>
           <div class="project-footer"><div class="chip-row"><span>Database design</span><span>Team project</span></div><span class="quiet-note">Introductory hackathon project</span></div>
         </article>
@@ -132,6 +200,6 @@
         <p class="contact-placeholder"></p>
       </section>
     </main>
-    <footer class="site-footer section-wrap"><a class="wordmark" href="#home" aria-label="Akarsh Shaurya, home">AK<span>.</span></a><p class="star-prompt">Catch a star · Drag to aim · Release to send it flying</p><a href="#home">Back to top ↑</a></footer>
+    <footer class="site-footer section-wrap"><a class="wordmark" href="#home" aria-label="Akarsh Shaurya, home">AK<span>.</span></a><p class="star-prompt">Catch a star · drag to aim · release to send it flying</p><a href="#home">Back to top ↑</a></footer>
   </body>
 </html>
