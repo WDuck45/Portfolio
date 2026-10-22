@@ -4,7 +4,10 @@
   const context = canvas.getContext("2d", { alpha: true });
   if (!context) return;
 
-  const MAX_PARTICLES = 84;
+  // This decorative layer shares a budget with the catchable stars below:
+  // 88 + at most 62 on desktop, and 29 + at most 31 on mobile.
+  const MAX_PARTICLES = 88;
+  let activeParticleCount = MAX_PARTICLES;
   const FORMATION_MS = 90000;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const groups = [
@@ -54,6 +57,7 @@
     pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     width = window.innerWidth;
     height = window.innerHeight;
+    activeParticleCount = width <= 640 ? 29 : MAX_PARTICLES;
     canvas.width = Math.round(width * pixelRatio);
     canvas.height = Math.round(height * pixelRatio);
     canvas.style.width = `${width}px`;
@@ -79,7 +83,8 @@
     const eased = progress * progress * (3 - 2 * progress);
     const driftAmount = 13 * (1 - eased * .72);
 
-    particles.forEach((particle, index) => {
+    for (let index = 0; index < activeParticleCount; index += 1) {
+      const particle = particles[index];
       const t = activeTime * .00018 + particle.phase;
       const target = particle.target;
       positions[index].x = target
@@ -88,7 +93,7 @@
       positions[index].y = target
         ? particle.startY + (particle.targetY - particle.startY) * eased + Math.cos(t * .83) * driftAmount * .4
         : particle.startY + Math.cos(t * .83) * driftAmount;
-    });
+    }
 
     if (progress > .025) {
       groups.forEach((group, groupIndex) => {
@@ -106,7 +111,8 @@
       });
     }
 
-    particles.forEach((particle, index) => {
+    for (let index = 0; index < activeParticleCount; index += 1) {
+      const particle = particles[index];
       const position = positions[index];
       const twinkle = .55 + (Math.sin(activeTime * .001 + particle.phase) + 1) * .16;
       context.globalAlpha = particle.target ? twinkle * (.28 + eased * .52) : twinkle * .35;
@@ -116,7 +122,7 @@
         ? (particle.target.groupIndex === 1 ? "#ddd2ff" : "#d8f5ff")
         : "#c8d8f5";
       context.fill();
-    });
+    }
     context.globalAlpha = 1;
   }
 
@@ -180,6 +186,7 @@
   let pixelRatio = 1;
   let targetCount = 0;
   let activeStar = null;
+  let touchInputActive = false;
   let pointer = { x: 0, y: 0, lastX: 0, lastY: 0, lastTime: 0 };
   let animationFrame = 0;
   let meteor = null;
@@ -215,7 +222,7 @@
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-    targetCount = Math.min(55, Math.max(32, Math.round((width * height) / 16000)));
+    targetCount = width <= 640 ? 24 : Math.min(55, Math.max(32, Math.round((width * height) / 16000)));
     while (stars.length < targetCount) stars.push(makeStar());
     while (stars.length > targetCount) stars.pop();
     ensureAmbientMovers();
@@ -473,10 +480,7 @@
     return { x: event.clientX, y: event.clientY };
   }
 
-  function onPointerDown(event) {
-    if (event.button !== 0 && event.pointerType !== "touch") return;
-    if (event.target instanceof Element && event.target.closest("a, button, input, textarea, select")) return;
-    const { x, y } = localPoint(event);
+  function beginStarDrag(x, y) {
     let nearest = null;
     let nearestDistance = 38;
     for (const star of stars) {
@@ -486,20 +490,18 @@
         nearestDistance = distance;
       }
     }
-    if (!nearest) return;
+    if (!nearest) return false;
     activeStar = nearest;
     activeStar.held = true;
     activeStar.ambientMover = false;
     activeStar.collisionMotion = false;
     activeStar.collisionSettled = false;
     pointer = { x, y, lastX: x, lastY: y, lastTime: performance.now() };
-    if (event.pointerType === "touch") event.preventDefault();
+    return true;
   }
 
-  function onPointerMove(event) {
+  function moveActiveStar(x, y, now = performance.now()) {
     if (!activeStar) return;
-    const now = performance.now();
-    const { x, y } = localPoint(event);
     const elapsed = Math.max(8, now - pointer.lastTime);
     pointer.x = x;
     pointer.y = y;
@@ -508,7 +510,44 @@
     pointer.lastX = x;
     pointer.lastY = y;
     pointer.lastTime = now;
+  }
+
+  function onPointerDown(event) {
+    if (touchInputActive && event.pointerType === "touch") return;
+    if (event.button !== 0 && event.pointerType !== "touch") return;
+    if (event.target instanceof Element && event.target.closest("a, button, input, textarea, select")) return;
+    const { x, y } = localPoint(event);
+    if (beginStarDrag(x, y) && event.pointerType === "touch") event.preventDefault();
+  }
+
+  function onPointerMove(event) {
+    if (touchInputActive && event.pointerType === "touch") return;
+    if (!activeStar) return;
+    const { x, y } = localPoint(event);
+    moveActiveStar(x, y);
     event.preventDefault();
+  }
+
+  function onTouchStart(event) {
+    if (event.target instanceof Element && event.target.closest("a, button, input, textarea, select")) return;
+    touchInputActive = true;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    if (!activeStar) beginStarDrag(touch.clientX, touch.clientY);
+    if (activeStar) event.preventDefault();
+  }
+
+  function onTouchMove(event) {
+    if (!activeStar) return;
+    const touch = event.touches[0];
+    if (!touch) return;
+    moveActiveStar(touch.clientX, touch.clientY);
+    event.preventDefault();
+  }
+
+  function onTouchEnd() {
+    onPointerUp();
+    touchInputActive = false;
   }
 
   function onPointerUp() {
@@ -554,10 +593,10 @@
       });
       if (mode === "model") {
         signalCaption.textContent = "MODEL PREVIEW · FEATURES → FLAGS";
-        signalFootnote.textContent = "In-development pipeline preview · not an actual model prediction";
+        signalFootnote.textContent = "Model pipeline preview · prediction workflow in development";
       } else {
         signalCaption.textContent = "RAW PPG · 30 SECOND WINDOW";
-        signalFootnote.textContent = "Illustrative sample trace · not a medical reading";
+        signalFootnote.textContent = "Illustrative PPG waveform · sample visualization";
       }
     });
   });
@@ -568,6 +607,12 @@
   document.addEventListener("pointermove", onPointerMove, { passive: false });
   document.addEventListener("pointerup", onPointerUp);
   document.addEventListener("pointercancel", onPointerUp);
+  // Pointer Events cover modern touch browsers; these explicit touch listeners
+  // keep dragging dependable on mobile browsers that still synthesize pointers.
+  document.addEventListener("touchstart", onTouchStart, { passive: false });
+  document.addEventListener("touchmove", onTouchMove, { passive: false });
+  document.addEventListener("touchend", onTouchEnd, { passive: true });
+  document.addEventListener("touchcancel", onTouchEnd, { passive: true });
   reducedMotion.addEventListener?.("change", () => {
     window.cancelAnimationFrame(animationFrame);
     animationFrame = window.requestAnimationFrame(frame);
