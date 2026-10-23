@@ -38,9 +38,12 @@ a { color: inherit; text-decoration: none; }
 .main-nav .header-download { color: var(--ink); }
 .main-nav a { color: var(--muted); font-size: 12px; transition: color .2s ease; }
 .main-nav a:hover, .header-download:hover, .text-link:hover, .site-footer a:hover { color: var(--accent-light); }
-.header-actions { display: flex; align-items: center; gap: 12px; position: relative; z-index: 3; }
-.header-social-link { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); transition: color .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease; }
-.header-social-link:hover { color: var(--accent-light); background: rgba(56,189,248,.07); border-color: rgba(56,189,248,.28); box-shadow: 0 0 18px rgba(56,189,248,.1); }
+.header-actions { display: flex; align-items: center; gap: 12px; position: relative; z-index: 3; flex: 0 0 auto; }
+.header-social-group { display: flex; align-items: center; gap: 8px; }
+.header-social-link { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); transition: color .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.header-social-link:hover, .header-social-link:focus-visible { color: var(--accent-light); background: rgba(56,189,248,.07); border-color: rgba(56,189,248,.28); box-shadow: 0 0 18px rgba(56,189,248,.1); }
+.header-social-link:hover { transform: translateY(-1px); }
+.header-social-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .header-social-link svg { width: 17px; height: 17px; }
 .linkedin-icon { width: 16px; height: 16px; flex: 0 0 auto; }
 .linkedin-contact { display: inline-flex; align-items: center; gap: 8px; }
@@ -198,7 +201,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
   .main-nav { gap: clamp(8px, 1.2vw, 12px); }
   .main-nav a { font-size: 10px; }
   .header-actions { gap: 8px; }
-  .header-social-link { display: none; }
+  .header-social-group { gap: 6px; }
   .header-download { padding: 8px 10px; font-size: 11px; }
 }
 
@@ -235,6 +238,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 @media (max-width: 500px) {
   .site-header { padding-inline: 16px; }
   .wordmark { font-size: 17px; }
+  .header-actions { gap: 6px; }
+  .header-social-group { gap: 5px; }
+  .header-social-link { width: 32px; height: 32px; }
+  .header-social-link svg { width: 15px; height: 15px; }
+  .nav-toggle { width: 36px; height: 36px; }
   .main-nav { left: 12px; right: 12px; }
   .section-wrap { width: calc(100% - 36px); }
   .hero { min-height: auto; padding-top: 64px; gap: 28px; }
