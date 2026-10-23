@@ -774,11 +774,16 @@
 
   document.querySelectorAll("[data-debt-panel]").forEach((panel) => {
     const toggle = panel.querySelector("[data-debt-toggle]");
+    const netEdge = panel.querySelector(".debt-edge-net");
     toggle?.addEventListener("click", () => {
       const settled = panel.dataset.state !== "settled";
       panel.dataset.state = settled ? "settled" : "before";
+      panel.classList.toggle("is-running", settled);
       toggle.setAttribute("aria-pressed", String(settled));
       toggle.textContent = settled ? "RESET FLOW" : "RUN SETTLEMENT";
+    });
+    netEdge?.addEventListener("animationend", (event) => {
+      if (event.animationName === "settlement-weight") panel.classList.remove("is-running");
     });
   });
 
@@ -840,10 +845,14 @@
         });
       }
       lab.querySelectorAll("[data-entity]").forEach((element) => {
-        element.classList.toggle("is-highlighted", relatedEntities.has(element.dataset.entity));
+        const active = relatedEntities.has(element.dataset.entity);
+        element.classList.toggle("is-highlighted", active);
+        element.classList.toggle("active", active);
       });
       lab.querySelectorAll("[data-rel]").forEach((element) => {
-        element.classList.toggle("is-highlighted", activeRelations.has(element));
+        const active = activeRelations.has(element);
+        element.classList.toggle("is-highlighted", active);
+        element.classList.toggle("active", active);
       });
       lab.querySelectorAll(".network-node[role=button]").forEach((node) => {
         node.setAttribute("aria-pressed", String(node === selectedNode));
