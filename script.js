@@ -262,6 +262,8 @@
   const MAX_MOVING_STARS = 5;
   let activeStar = null;
   let touchInputActive = false;
+  let pendingTouch = null;
+  let touchHoldTimer = 0;
   let pointer = { x: 0, y: 0, lastX: 0, lastY: 0, lastTime: 0 };
   let animationFrame = 0;
   let meteor = null;
@@ -634,11 +636,12 @@
   }
 
   function onPointerDown(event) {
-    if (touchInputActive && event.pointerType === "touch") return;
-    if (event.button !== 0 && event.pointerType !== "touch") return;
+    // Touch input uses a hold-to-grab gesture below so vertical swipes remain native scrolling.
+    if (event.pointerType === "touch") return;
+    if (event.button !== 0) return;
     if (event.target instanceof Element && event.target.closest("a, button, input, textarea, select")) return;
     const { x, y } = localPoint(event);
-    if (beginStarDrag(x, y) && event.pointerType === "touch") event.preventDefault();
+    beginStarDrag(x, y);
   }
 
   function onPointerMove(event) {
@@ -650,23 +653,37 @@
   }
 
   function onTouchStart(event) {
-    if (event.target instanceof Element && event.target.closest("a, button, input, textarea, select")) return;
+    const blockedTargets = "a, button, input, textarea, select, [role=\"button\"], .mdp-card, .signal-panel, .lab-card, .education-card, .project-card, .beyond-card";
+    if (event.target instanceof Element && event.target.closest(blockedTargets)) return;
     touchInputActive = true;
     const touch = event.changedTouches[0];
     if (!touch) return;
-    if (!activeStar) beginStarDrag(touch.clientX, touch.clientY);
-    if (activeStar) event.preventDefault();
+
+    pendingTouch = { x: touch.clientX, y: touch.clientY };
+    window.clearTimeout(touchHoldTimer);
+    touchHoldTimer = window.setTimeout(() => {
+      if (!pendingTouch || activeStar) return;
+      if (beginStarDrag(pendingTouch.x, pendingTouch.y)) pendingTouch = null;
+    }, 280);
   }
 
   function onTouchMove(event) {
-    if (!activeStar) return;
     const touch = event.touches[0];
     if (!touch) return;
+    if (!activeStar) {
+      if (pendingTouch && Math.hypot(touch.clientX - pendingTouch.x, touch.clientY - pendingTouch.y) > 8) {
+        window.clearTimeout(touchHoldTimer);
+        pendingTouch = null;
+      }
+      return;
+    }
     moveActiveStar(touch.clientX, touch.clientY);
     event.preventDefault();
   }
 
   function onTouchEnd() {
+    window.clearTimeout(touchHoldTimer);
+    pendingTouch = null;
     onPointerUp();
     touchInputActive = false;
   }
