@@ -7,9 +7,10 @@
   const MAX_PARTICLES = 120;
   const MAX_CONCURRENT_CONSTELLATIONS = 3;
   const MAX_NODES_PER_CONSTELLATION = 14;
-  const SPAWN_INTERVAL_MS = 10000;
-  const FORMATION_MS = 20000;
-  const FADE_MS = 10000;
+  const SPAWN_INTERVAL_MS = 20000;
+  const FORMATION_MS = 40000;
+  const FADE_MS = 12000;
+  const LINE_INTRO_MS = 6000;
   const INSTANCE_LIFETIME_MS = FORMATION_MS + FADE_MS;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const anchors = [[.2, .3], [.78, .32], [.5, .72], [.22, .73], [.76, .73]];
@@ -175,7 +176,9 @@
         context.moveTo(instance.nodes[from].x, instance.nodes[from].y);
         context.lineTo(instance.nodes[to].x, instance.nodes[to].y);
       });
-      context.strokeStyle = `rgba(${instance.group.color.join(",")},${(.04 + .16 * eased) * opacity})`;
+      const lineIntro = smoothstep(age / LINE_INTRO_MS);
+      const lineOpacity = (.025 + .07 * lineIntro + .105 * eased) * opacity;
+      context.strokeStyle = `rgba(${instance.group.color.join(",")},${lineOpacity})`;
       context.lineWidth = 0.7;
       context.stroke();
 
