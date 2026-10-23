@@ -664,7 +664,7 @@
     touchHoldTimer = window.setTimeout(() => {
       if (!pendingTouch || activeStar) return;
       if (beginStarDrag(pendingTouch.x, pendingTouch.y)) pendingTouch = null;
-    }, 280);
+    }, 160);
   }
 
   function onTouchMove(event) {
