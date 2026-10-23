@@ -4,41 +4,31 @@
   const context = canvas.getContext("2d", { alpha: true });
   if (!context) return;
 
-  // This decorative layer shares a budget with the catchable stars below:
-  // 88 + at most 62 on desktop, and 29 + at most 31 on mobile.
+  // Keep the background light while giving each constellation a short, repeatable life.
   const MAX_PARTICLES = 88;
   let activeParticleCount = MAX_PARTICLES;
-  const FORMATION_MS = 90000;
+  const FORMATION_MS = 10000;
+  const HOLD_MS = 28000;
+  const FADE_MS = 8000;
+  const CYCLE_MS = FORMATION_MS + HOLD_MS + FADE_MS;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const groups = [
-    {
-      center: [0.2, 0.3], color: [56, 189, 248],
-      points: [[-1, 0], [-.45, -.65], [.2, -.8], [.85, -.35], [.75, .4], [.05, .75], [-.7, .5]],
-      links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [1, 6], [6, 5]],
-    },
-    {
-      center: [0.72, 0.28], color: [167, 139, 250],
-      points: [[-1, -.45], [-.35, -.8], [.35, -.6], [.95, -.05], [.55, .65], [-.2, .85], [-.75, .35]],
-      links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0], [2, 5]],
-    },
-    {
-      center: [0.49, 0.72], color: [125, 211, 252],
-      points: [[-1, -.1], [-.5, -.8], [.1, -.55], [.85, -.7], [.55, .05], [.95, .7], [.1, .8], [-.55, .55]],
-      links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0], [2, 4]],
-    },
+    { center: [.18, .3], color: [56, 189, 248], points: [[-1, 0], [-.45, -.65], [.2, -.8], [.85, -.35], [.75, .4], [.05, .75], [-.7, .5]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [1, 6], [6, 5]] },
+    { center: [.76, .25], color: [167, 139, 250], points: [[-1, -.45], [-.35, -.8], [.35, -.6], [.95, -.05], [.55, .65], [-.2, .85], [-.75, .35]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0], [2, 5]] },
+    { center: [.5, .72], color: [125, 211, 252], points: [[-1, -.1], [-.5, -.8], [.1, -.55], [.85, -.7], [.55, .05], [.95, .7], [.1, .8], [-.55, .55]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0], [2, 4]] },
+    { center: [.27, .68], color: [196, 181, 253], points: [[-1, .65], [-.7, -.35], [-.2, -.8], [.45, -.7], [1, -.1], [.35, .05], [-.1, .8]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 2], [5, 6], [6, 0]] },
+    { center: [.78, .68], color: [103, 232, 249], points: [[-1, -.55], [-.5, -.15], [-.8, .5], [-.1, .9], [.35, .35], [.95, .55], [.6, -.35], [.05, -.8]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0], [1, 4], [4, 6]] },
+    { center: [.48, .28], color: [147, 197, 253], points: [[-1, .45], [-.65, -.4], [-.15, .15], [.15, -.85], [.4, .12], [1, -.55], [.75, .65]], links: [[0, 1], [1, 2], [2, 0], [2, 3], [3, 4], [4, 5], [5, 6], [6, 4]] },
+    { center: [.23, .47], color: [192, 132, 252], points: [[-1, -.2], [-.55, -.7], [-.1, -.15], [.25, -.8], [.65, -.25], [1, .15], [.55, .65], [.05, .35], [-.45, .8]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 0]] },
+    { center: [.74, .46], color: [94, 234, 212], points: [[-1, .55], [-.65, -.45], [-.2, .25], [.1, -.8], [.45, .2], [.8, -.55], [1, .6]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [2, 4]] },
+    { center: [.5, .52], color: [129, 140, 248], points: [[-1, -.75], [-.35, -.45], [.25, -.95], [.95, -.55], [.4, -.05], [.95, .55], [.1, .9], [-.45, .35], [-.95, .75]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 1], [4, 7]] },
+    { center: [.3, .25], color: [125, 211, 252], points: [[-1, .1], [-.55, -.7], [.1, -.9], [.75, -.45], [.95, .35], [.35, .85], [-.4, .65]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0], [0, 3], [3, 5]] },
+    { center: [.7, .75], color: [167, 139, 250], points: [[-1, -.5], [-.3, -.1], [.3, -.8], [.75, -.2], [1, .55], [.25, .35], [-.25, .9], [-.7, .45]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0], [1, 5], [5, 3]] },
   ];
-  const nodeTargets = [];
-  const edges = [];
-  groups.forEach((group, groupIndex) => {
-    const firstNode = nodeTargets.length;
-    group.points.forEach(([x, y]) => nodeTargets.push({ groupIndex, x, y }));
-    group.links.forEach(([from, to]) => edges.push({ from: firstNode + from, to: firstNode + to, groupIndex }));
-  });
-
   const particles = Array.from({ length: MAX_PARTICLES }, (_, index) => ({
     phase: Math.random() * Math.PI * 2,
-    radius: index < nodeTargets.length ? 1 + Math.random() * .45 : .45 + Math.random() * .55,
-    target: index < nodeTargets.length ? nodeTargets[index] : null,
+    radius: index < 10 ? 1 + Math.random() * .45 : .45 + Math.random() * .55,
+    target: index < 10,
     startX: 0,
     startY: 0,
     targetX: 0,
@@ -52,6 +42,32 @@
   let previousFrame = 0;
   let animationFrame = 0;
   let running = false;
+  let activeGroupIndex = 0;
+  let previousGroupIndex = -1;
+  let hasDrawn = false;
+
+  function smoothstep(value) {
+    const t = Math.max(0, Math.min(1, value));
+    return t * t * (3 - 2 * t);
+  }
+
+  function setGroup(index, preservePositions) {
+    activeGroupIndex = index;
+    const group = groups[index];
+    const scale = Math.min(width, height) * .105;
+    particles.forEach((particle, particleIndex) => {
+      if (preservePositions && hasDrawn) {
+        particle.startX = positions[particleIndex].x;
+        particle.startY = positions[particleIndex].y;
+      }
+      particle.target = particleIndex < group.points.length;
+      if (particle.target) {
+        const [x, y] = group.points[particleIndex];
+        particle.targetX = Math.max(20, Math.min(width - 20, group.center[0] * width + x * scale));
+        particle.targetY = Math.max(20, Math.min(height - 20, group.center[1] * height + y * scale));
+      }
+    });
+  }
 
   function resize() {
     pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
@@ -63,73 +79,78 @@
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-
-    const scale = Math.min(width, height) * .105;
-    particles.forEach((particle) => {
+    particles.forEach((particle, index) => {
       particle.startX = Math.random() * width;
       particle.startY = Math.random() * height;
-      if (particle.target) {
-        const group = groups[particle.target.groupIndex];
-        particle.targetX = Math.max(20, Math.min(width - 20, group.center[0] * width + particle.target.x * scale));
-        particle.targetY = Math.max(20, Math.min(height - 20, group.center[1] * height + particle.target.y * scale));
-      }
+      positions[index].x = particle.startX;
+      positions[index].y = particle.startY;
     });
+    hasDrawn = false;
+    setGroup(activeGroupIndex, false);
     draw();
   }
 
   function draw() {
     context.clearRect(0, 0, width, height);
-    const progress = reducedMotion.matches ? 1 : Math.min(activeTime / FORMATION_MS, 1);
-    const eased = progress * progress * (3 - 2 * progress);
-    const driftAmount = 13 * (1 - eased * .72);
+    const cycleAge = activeTime % CYCLE_MS;
+    const progress = reducedMotion.matches ? 1 : Math.min(cycleAge / FORMATION_MS, 1);
+    const eased = smoothstep(progress);
+    const fadeStart = FORMATION_MS + HOLD_MS;
+    const constellationAlpha = cycleAge > fadeStart
+      ? 1 - smoothstep((cycleAge - fadeStart) / FADE_MS)
+      : 1;
+    const group = groups[activeGroupIndex];
+    const driftAmount = 13;
 
     for (let index = 0; index < activeParticleCount; index += 1) {
       const particle = particles[index];
       const t = activeTime * .00018 + particle.phase;
-      const target = particle.target;
-      positions[index].x = target
+      positions[index].x = particle.target
         ? particle.startX + (particle.targetX - particle.startX) * eased + Math.sin(t) * driftAmount * .4
         : particle.startX + Math.sin(t) * driftAmount;
-      positions[index].y = target
+      positions[index].y = particle.target
         ? particle.startY + (particle.targetY - particle.startY) * eased + Math.cos(t * .83) * driftAmount * .4
         : particle.startY + Math.cos(t * .83) * driftAmount;
     }
 
-    if (progress > .025) {
-      groups.forEach((group, groupIndex) => {
-        context.beginPath();
-        edges.forEach((edge) => {
-          if (edge.groupIndex !== groupIndex) return;
-          const from = positions[edge.from];
-          const to = positions[edge.to];
-          context.moveTo(from.x, from.y);
-          context.lineTo(to.x, to.y);
-        });
-        context.strokeStyle = `rgba(${group.color.join(",")},${.16 * eased})`;
-        context.lineWidth = .7;
-        context.stroke();
+    if (progress > .025 && constellationAlpha > .005) {
+      context.beginPath();
+      group.links.forEach(([from, to]) => {
+        context.moveTo(positions[from].x, positions[from].y);
+        context.lineTo(positions[to].x, positions[to].y);
       });
+      context.strokeStyle = `rgba(${group.color.join(",")},${.2 * eased * constellationAlpha})`;
+      context.lineWidth = .7;
+      context.stroke();
     }
 
     for (let index = 0; index < activeParticleCount; index += 1) {
       const particle = particles[index];
       const position = positions[index];
       const twinkle = .55 + (Math.sin(activeTime * .001 + particle.phase) + 1) * .16;
-      context.globalAlpha = particle.target ? twinkle * (.28 + eased * .52) : twinkle * .35;
+      context.globalAlpha = particle.target
+        ? twinkle * (.28 + eased * .52) * constellationAlpha
+        : twinkle * .35;
       context.beginPath();
       context.arc(position.x, position.y, particle.radius, 0, Math.PI * 2);
-      context.fillStyle = particle.target
-        ? (particle.target.groupIndex === 1 ? "#ddd2ff" : "#d8f5ff")
-        : "#c8d8f5";
+      context.fillStyle = particle.target ? "#d8f5ff" : "#c8d8f5";
       context.fill();
     }
     context.globalAlpha = 1;
+    hasDrawn = true;
   }
 
   function frame(now) {
     if (!running) return;
     if (previousFrame) activeTime += Math.min(now - previousFrame, 50);
     previousFrame = now;
+    const groupIndex = Math.floor(activeTime / CYCLE_MS) % groups.length;
+    if (groupIndex !== previousGroupIndex) {
+      let nextIndex = groupIndex;
+      if (previousGroupIndex >= 0 && nextIndex === previousGroupIndex) nextIndex = (nextIndex + 1) % groups.length;
+      setGroup(nextIndex, previousGroupIndex >= 0);
+      previousGroupIndex = nextIndex;
+    }
     draw();
     animationFrame = window.requestAnimationFrame(frame);
   }
@@ -139,6 +160,7 @@
     running = true;
     previousFrame = 0;
     if (reducedMotion.matches) {
+      activeTime = FORMATION_MS;
       draw();
       return;
     }
@@ -159,8 +181,10 @@
 
   function handleMotionPreference() {
     stop();
-    if (reducedMotion.matches) draw();
-    else start();
+    if (reducedMotion.matches) {
+      activeTime = FORMATION_MS;
+      draw();
+    } else start();
   }
 
   resize();
@@ -168,8 +192,7 @@
   document.addEventListener("visibilitychange", handleVisibility);
   reducedMotion.addEventListener?.("change", handleMotionPreference);
   if (!document.hidden) start();
-})();
-
+})()
 (() => {
   const canvas = document.getElementById("starfield");
   const context = canvas.getContext("2d", { alpha: true });
