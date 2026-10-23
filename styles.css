@@ -73,7 +73,7 @@ h1 span, .contact-section h2 span { color: var(--accent-light); }
 .button-secondary { border-color: rgba(59,130,246,.24); background: rgba(255,255,255,.045); color: var(--ink); }
 .button-secondary:hover { border-color: rgba(56,189,248,.4); background: rgba(255,255,255,.08); box-shadow: 0 0 20px rgba(56,189,248,.2); }
 .text-link { color: var(--muted); font-size: 12px; transition: color .2s ease; }
-.text-link span { color: var(--accent); margin-left: 5px; }
+.text-link .link-arrow-icon { color: var(--accent); }
 .hero-facts { display: flex; flex-wrap: wrap; gap: 12px 26px; margin-top: 42px; color: var(--muted); font-size: 11px; }
 .hero-facts span::before { content: ""; display: inline-block; width: 4px; height: 4px; margin: 0 10px 2px 0; border-radius: 50%; background: var(--accent); }
 .star-hint { margin: 18px 0 0; color: var(--quiet); font: 500 9px/1.6 var(--font-mono); letter-spacing: .04em; }
@@ -167,7 +167,7 @@ h2 { margin-bottom: 0; font: normal clamp(29px, 4vw, 42px)/1.2 var(--font-displa
 .project-contribution p { margin: 7px 0 0; color: #c6cad4; font-size: 12px; }
 .project-footer { padding-top: 17px; border-top: 1px solid var(--line); }
 .project-link { color: var(--accent-light); font-size: 11px; }
-.project-link span { margin-left: 5px; }
+.project-link .link-arrow-icon { margin-left: 5px; }
 
 /* Compact project lab-bench visualizations */
 .project-visual { margin: 2px 0 22px; padding: 15px; overflow: hidden; border: 1px solid rgba(56,189,248,.12); border-radius: 12px; background: linear-gradient(145deg, rgba(5,15,29,.74), rgba(5,10,22,.58)); box-shadow: inset 0 1px 0 rgba(255,255,255,.035); }
@@ -519,7 +519,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 }
 .inspector-command { gap: 9px; }
 .inspector-command > span:last-child { overflow-wrap: anywhere; }
-.inspector-bolt { color: #9cebd1; font-size: 13px; }
+.inspector-bolt { width: 14px; height: 14px; flex: 0 0 auto; color: #9cebd1; }
 .inspector-side { flex: 0 0 auto; gap: 8px; color: #8194ab; }
 .inspector-live-dot {
   width: 6px;
@@ -580,3 +580,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 @media (prefers-reduced-motion: reduce) {
   .project-inspector[open] > .project-visual { animation: none; }
 }
+
+
+/* Keep small interface marks consistent across emoji and system font platforms. */
+.link-arrow-icon,
+.down-arrow-icon {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  vertical-align: -2px;
+}
+.text-link .link-arrow-icon { margin-left: 5px; }
+.button .down-arrow-icon { margin-left: 5px; }
+
+.beyond-arrow-mark { display: block; width: 21px; height: 21px; }
