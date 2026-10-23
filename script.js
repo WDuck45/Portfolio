@@ -4,153 +4,197 @@
   const context = canvas.getContext("2d", { alpha: true });
   if (!context) return;
 
-  // Keep the background light while giving each constellation a short, repeatable life.
-  const MAX_PARTICLES = 88;
-  let activeParticleCount = MAX_PARTICLES;
-  const FORMATION_MS = 10000;
-  const HOLD_MS = 28000;
-  const FADE_MS = 8000;
-  const CYCLE_MS = FORMATION_MS + HOLD_MS + FADE_MS;
+  const MAX_PARTICLES = 120;
+  const MAX_CONCURRENT_CONSTELLATIONS = 3;
+  const MAX_NODES_PER_CONSTELLATION = 14;
+  const SPAWN_INTERVAL_MS = 10000;
+  const FORMATION_MS = 20000;
+  const FADE_MS = 10000;
+  const INSTANCE_LIFETIME_MS = FORMATION_MS + FADE_MS;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const anchors = [[.2, .3], [.78, .32], [.5, .72], [.22, .73], [.76, .73]];
   const groups = [
-    { center: [.18, .3], color: [56, 189, 248], points: [[-1, 0], [-.45, -.65], [.2, -.8], [.85, -.35], [.75, .4], [.05, .75], [-.7, .5]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [1, 6], [6, 5]] },
-    { center: [.76, .25], color: [167, 139, 250], points: [[-1, -.45], [-.35, -.8], [.35, -.6], [.95, -.05], [.55, .65], [-.2, .85], [-.75, .35]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0], [2, 5]] },
-    { center: [.5, .72], color: [125, 211, 252], points: [[-1, -.1], [-.5, -.8], [.1, -.55], [.85, -.7], [.55, .05], [.95, .7], [.1, .8], [-.55, .55]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0], [2, 4]] },
-    { center: [.27, .68], color: [196, 181, 253], points: [[-1, .65], [-.7, -.35], [-.2, -.8], [.45, -.7], [1, -.1], [.35, .05], [-.1, .8]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 2], [5, 6], [6, 0]] },
-    { center: [.78, .68], color: [103, 232, 249], points: [[-1, -.55], [-.5, -.15], [-.8, .5], [-.1, .9], [.35, .35], [.95, .55], [.6, -.35], [.05, -.8]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0], [1, 4], [4, 6]] },
-    { center: [.48, .28], color: [147, 197, 253], points: [[-1, .45], [-.65, -.4], [-.15, .15], [.15, -.85], [.4, .12], [1, -.55], [.75, .65]], links: [[0, 1], [1, 2], [2, 0], [2, 3], [3, 4], [4, 5], [5, 6], [6, 4]] },
-    { center: [.23, .47], color: [192, 132, 252], points: [[-1, -.2], [-.55, -.7], [-.1, -.15], [.25, -.8], [.65, -.25], [1, .15], [.55, .65], [.05, .35], [-.45, .8]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 0]] },
-    { center: [.74, .46], color: [94, 234, 212], points: [[-1, .55], [-.65, -.45], [-.2, .25], [.1, -.8], [.45, .2], [.8, -.55], [1, .6]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [2, 4]] },
-    { center: [.5, .52], color: [129, 140, 248], points: [[-1, -.75], [-.35, -.45], [.25, -.95], [.95, -.55], [.4, -.05], [.95, .55], [.1, .9], [-.45, .35], [-.95, .75]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 1], [4, 7]] },
-    { center: [.3, .25], color: [125, 211, 252], points: [[-1, .1], [-.55, -.7], [.1, -.9], [.75, -.45], [.95, .35], [.35, .85], [-.4, .65]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0], [0, 3], [3, 5]] },
-    { center: [.7, .75], color: [167, 139, 250], points: [[-1, -.5], [-.3, -.1], [.3, -.8], [.75, -.2], [1, .55], [.25, .35], [-.25, .9], [-.7, .45]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0], [1, 5], [5, 3]] },
+    { color: [56, 189, 248], size: 1, points: [[-1, 0], [-.45, -.65], [.2, -.8], [.85, -.35], [.75, .4], [.05, .75], [-.7, .5]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [1, 6], [6, 5]] },
+    { color: [167, 139, 250], size: 1, points: [[-1, -.45], [-.35, -.8], [.35, -.6], [.95, -.05], [.55, .65], [-.2, .85], [-.75, .35]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0], [2, 5]] },
+    { color: [125, 211, 252], size: 1, points: [[-1, -.1], [-.5, -.8], [.1, -.55], [.85, -.7], [.55, .05], [.95, .7], [.1, .8], [-.55, .55]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0], [2, 4]] },
+    { color: [196, 181, 253], size: 1, points: [[-1, .65], [-.7, -.35], [-.2, -.8], [.45, -.7], [1, -.1], [.35, .05], [-.1, .8]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 2], [5, 6], [6, 0]] },
+    { color: [103, 232, 249], size: 1, points: [[-1, -.55], [-.5, -.15], [-.8, .5], [-.1, .9], [.35, .35], [.95, .55], [.6, -.35], [.05, -.8]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0], [1, 4], [4, 6]] },
+    { color: [147, 197, 253], size: 1, points: [[-1, .45], [-.65, -.4], [-.15, .15], [.15, -.85], [.4, .12], [1, -.55], [.75, .65]], links: [[0, 1], [1, 2], [2, 0], [2, 3], [3, 4], [4, 5], [5, 6], [6, 4]] },
+    { color: [192, 132, 252], size: 1, points: [[-1, -.2], [-.55, -.7], [-.1, -.15], [.25, -.8], [.65, -.25], [1, .15], [.55, .65], [.05, .35], [-.45, .8]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 0]] },
+    { color: [94, 234, 212], size: 1, points: [[-1, .55], [-.65, -.45], [-.2, .25], [.1, -.8], [.45, .2], [.8, -.55], [1, .6]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [2, 4]] },
+    { color: [129, 140, 248], size: 1, points: [[-1, -.75], [-.35, -.45], [.25, -.95], [.95, -.55], [.4, -.05], [.95, .55], [.1, .9], [-.45, .35], [-.95, .75]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 1], [4, 7]] },
+    { color: [125, 211, 252], size: 1, points: [[-1, .1], [-.55, -.7], [.1, -.9], [.75, -.45], [.95, .35], [.35, .85], [-.4, .65]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0], [0, 3], [3, 5]] },
+    { color: [167, 139, 250], size: 1, points: [[-1, -.5], [-.3, -.1], [.3, -.8], [.75, -.2], [1, .55], [.25, .35], [-.25, .9], [-.7, .45]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0], [1, 5], [5, 3]] },
+    { color: [103, 232, 249], size: 1.35, points: [[-1, -.7], [-.65, -.15], [-.9, .55], [-.35, .9], [.05, .35], [.4, .9], [.9, .55], [.65, -.1], [1, -.7], [.2, -.4], [-.15, -.85], [.15, .05]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 0], [4, 11], [11, 9]] },
+    { color: [192, 132, 252], size: 1.35, points: [[-1, .45], [-.7, -.05], [-.8, -.65], [-.25, -.9], [.1, -.45], [.5, -.9], [1, -.5], [.72, .05], [1, .55], [.45, .9], [0, .5], [-.4, .95], [-.65, .45]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 0], [4, 10]] },
+    { color: [56, 189, 248], size: 1.4, points: [[-1, -.7], [-.6, -.35], [-.15, -.8], [.2, -.35], [.75, -.7], [1, -.15], [.5, .05], [.9, .6], [.35, .45], [.05, .95], [-.35, .45], [-.85, .8], [-.65, .05], [-.1, .05]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 0], [3, 13], [13, 10], [6, 13]] },
+    { color: [94, 234, 212], size: 1.35, points: [[-1, .5], [-.72, -.1], [-.85, -.75], [-.35, -.45], [-.05, -.9], [.25, -.35], [.65, -.8], [1, -.35], [.55, .1], [.95, .7], [.4, .55], [.05, .95], [-.45, .5], [-.85, .9]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 13], [13, 0], [3, 12], [5, 10]] },
+    { color: [129, 140, 248], size: 1.4, points: [[-1, -.2], [-.7, -.7], [-.35, -.25], [-.1, -.9], [.25, -.4], [.65, -.85], [1, -.3], [.65, .1], [1, .65], [.45, .9], [.15, .4], [-.25, .9], [-.65, .55], [-.95, .9]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 13], [13, 0], [2, 10], [4, 10], [7, 10]] },
+    { color: [196, 181, 253], size: 1.4, points: [[-1, .1], [-.72, -.45], [-.55, -.95], [-.2, -.5], [.05, -.95], [.35, -.4], [.72, -.85], [1, -.25], [.6, .15], [1, .65], [.45, .55], [.1, .95], [-.35, .5], [-.85, .8]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 13], [13, 0], [3, 12], [5, 10], [8, 10]] },
   ];
-  const particles = Array.from({ length: MAX_PARTICLES }, (_, index) => ({
+  const dust = Array.from({ length: MAX_PARTICLES }, () => ({
+    x: 0,
+    y: 0,
     phase: Math.random() * Math.PI * 2,
-    radius: index < 10 ? 1 + Math.random() * .45 : .45 + Math.random() * .55,
-    target: index < 10,
-    startX: 0,
-    startY: 0,
-    targetX: 0,
-    targetY: 0,
+    radius: .45 + Math.random() * .55,
   }));
-  const positions = Array.from({ length: MAX_PARTICLES }, () => ({ x: 0, y: 0 }));
+  const constellations = [];
   let width = 0;
   let height = 0;
   let pixelRatio = 1;
+  let activeParticleCount = MAX_PARTICLES;
   let activeTime = 0;
   let previousFrame = 0;
   let animationFrame = 0;
   let running = false;
-  let activeGroupIndex = 0;
-  let previousGroupIndex = -1;
-  let hasDrawn = false;
+  let nextSpawnAt = 0;
+  let lastGroupIndex = -1;
+  let formationIndex = 0;
 
   function smoothstep(value) {
     const t = Math.max(0, Math.min(1, value));
     return t * t * (3 - 2 * t);
   }
 
-  function setGroup(index, preservePositions) {
-    activeGroupIndex = index;
-    const group = groups[index];
-    const scale = Math.min(width, height) * .105;
-    particles.forEach((particle, particleIndex) => {
-      if (preservePositions && hasDrawn) {
-        particle.startX = positions[particleIndex].x;
-        particle.startY = positions[particleIndex].y;
-      }
-      particle.target = particleIndex < group.points.length;
-      if (particle.target) {
-        const [x, y] = group.points[particleIndex];
-        particle.targetX = Math.max(20, Math.min(width - 20, group.center[0] * width + x * scale));
-        particle.targetY = Math.max(20, Math.min(height - 20, group.center[1] * height + y * scale));
-      }
+  function chooseGroupIndex() {
+    let index = Math.floor(Math.random() * groups.length);
+    if (groups.length > 1 && index === lastGroupIndex) index = (index + 1 + Math.floor(Math.random() * (groups.length - 1))) % groups.length;
+    lastGroupIndex = index;
+    return index;
+  }
+
+  function targetPoint(point, group, anchor) {
+    const scale = Math.min(width, height) * .105 * group.size;
+    return {
+      x: Math.max(18, Math.min(width - 18, anchor[0] * width + point[0] * scale)),
+      y: Math.max(18, Math.min(height - 18, anchor[1] * height + point[1] * scale)),
+    };
+  }
+
+  function createConstellation(startTime) {
+    const groupIndex = chooseGroupIndex();
+    const group = groups[groupIndex];
+    const anchor = anchors[formationIndex % anchors.length];
+    formationIndex += 1;
+    const nodes = group.points.slice(0, MAX_NODES_PER_CONSTELLATION).map((point) => {
+      const target = targetPoint(point, group, anchor);
+      return {
+        point,
+        startX: Math.random() * width,
+        startY: Math.random() * height,
+        targetX: target.x,
+        targetY: target.y,
+        x: 0,
+        y: 0,
+        phase: Math.random() * Math.PI * 2,
+        radius: 1 + Math.random() * .45,
+      };
     });
+    return { group, groupIndex, anchor, startTime, nodes };
+  }
+
+  function updateConstellations() {
+    for (let index = constellations.length - 1; index >= 0; index -= 1) {
+      if (activeTime - constellations[index].startTime >= INSTANCE_LIFETIME_MS) constellations.splice(index, 1);
+    }
+    while (activeTime >= nextSpawnAt) {
+      if (constellations.length < MAX_CONCURRENT_CONSTELLATIONS) {
+        constellations.push(createConstellation(nextSpawnAt));
+      }
+      nextSpawnAt += SPAWN_INTERVAL_MS;
+    }
   }
 
   function resize() {
+    const previousWidth = width || window.innerWidth;
+    const previousHeight = height || window.innerHeight;
     pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     width = window.innerWidth;
     height = window.innerHeight;
-    activeParticleCount = width <= 640 ? 29 : MAX_PARTICLES;
+    activeParticleCount = width <= 640 ? 60 : MAX_PARTICLES;
     canvas.width = Math.round(width * pixelRatio);
     canvas.height = Math.round(height * pixelRatio);
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-    particles.forEach((particle, index) => {
-      particle.startX = Math.random() * width;
-      particle.startY = Math.random() * height;
-      positions[index].x = particle.startX;
-      positions[index].y = particle.startY;
+    dust.forEach((particle) => {
+      particle.x = Math.random() * width;
+      particle.y = Math.random() * height;
     });
-    hasDrawn = false;
-    setGroup(activeGroupIndex, false);
+    const scaleX = width / previousWidth;
+    const scaleY = height / previousHeight;
+    constellations.forEach((instance) => {
+      instance.nodes.forEach((node) => {
+        node.startX *= scaleX;
+        node.startY *= scaleY;
+        const target = targetPoint(node.point, instance.group, instance.anchor);
+        node.targetX = target.x;
+        node.targetY = target.y;
+      });
+    });
     draw();
   }
 
   function draw() {
+    updateConstellations();
     context.clearRect(0, 0, width, height);
-    const cycleAge = activeTime % CYCLE_MS;
-    const progress = reducedMotion.matches ? 1 : Math.min(cycleAge / FORMATION_MS, 1);
-    const eased = smoothstep(progress);
-    const fadeStart = FORMATION_MS + HOLD_MS;
-    const constellationAlpha = cycleAge > fadeStart
-      ? 1 - smoothstep((cycleAge - fadeStart) / FADE_MS)
-      : 1;
-    const group = groups[activeGroupIndex];
-    const driftAmount = 13;
-
-    for (let index = 0; index < activeParticleCount; index += 1) {
-      const particle = particles[index];
+    const constellationNodeCount = constellations.reduce((count, item) => count + item.nodes.length, 0);
+    const dustCount = Math.max(0, activeParticleCount - constellationNodeCount);
+    for (let index = 0; index < dustCount; index += 1) {
+      const particle = dust[index];
       const t = activeTime * .00018 + particle.phase;
-      positions[index].x = particle.target
-        ? particle.startX + (particle.targetX - particle.startX) * eased + Math.sin(t) * driftAmount * .4
-        : particle.startX + Math.sin(t) * driftAmount;
-      positions[index].y = particle.target
-        ? particle.startY + (particle.targetY - particle.startY) * eased + Math.cos(t * .83) * driftAmount * .4
-        : particle.startY + Math.cos(t * .83) * driftAmount;
-    }
-
-    if (progress > .025 && constellationAlpha > .005) {
-      context.beginPath();
-      group.links.forEach(([from, to]) => {
-        context.moveTo(positions[from].x, positions[from].y);
-        context.lineTo(positions[to].x, positions[to].y);
-      });
-      context.strokeStyle = `rgba(${group.color.join(",")},${.2 * eased * constellationAlpha})`;
-      context.lineWidth = .7;
-      context.stroke();
-    }
-
-    for (let index = 0; index < activeParticleCount; index += 1) {
-      const particle = particles[index];
-      const position = positions[index];
+      const x = particle.x + Math.sin(t) * 13;
+      const y = particle.y + Math.cos(t * .83) * 13;
       const twinkle = .55 + (Math.sin(activeTime * .001 + particle.phase) + 1) * .16;
-      context.globalAlpha = particle.target
-        ? twinkle * (.28 + eased * .52) * constellationAlpha
-        : twinkle * .35;
+      context.globalAlpha = twinkle * .28;
       context.beginPath();
-      context.arc(position.x, position.y, particle.radius, 0, Math.PI * 2);
-      context.fillStyle = particle.target ? "#d8f5ff" : "#c8d8f5";
+      context.arc(x, y, particle.radius, 0, Math.PI * 2);
+      context.fillStyle = "#c8d8f5";
       context.fill();
     }
+
+    const driftAmount = 13;
+    const time = reducedMotion.matches ? 0 : activeTime;
+    const easingTime = reducedMotion.matches ? 1 : undefined;
+    const fadeStart = FORMATION_MS;
+
+    constellations.forEach((instance) => {
+      const age = Math.max(0, activeTime - instance.startTime);
+      const progress = easingTime ?? Math.min(age / FORMATION_MS, 1);
+      const eased = smoothstep(progress);
+      const opacity = age <= fadeStart ? 1 : 1 - smoothstep((age - fadeStart) / FADE_MS);
+      instance.nodes.forEach((node) => {
+        const t = time * .00018 + node.phase;
+        node.x = node.startX + (node.targetX - node.startX) * eased + Math.sin(t) * driftAmount * .4;
+        node.y = node.startY + (node.targetY - node.startY) * eased + Math.cos(t * .83) * driftAmount * .4;
+      });
+
+      context.beginPath();
+      instance.group.links.forEach(([from, to]) => {
+        if (!instance.nodes[from] || !instance.nodes[to]) return;
+        context.moveTo(instance.nodes[from].x, instance.nodes[from].y);
+        context.lineTo(instance.nodes[to].x, instance.nodes[to].y);
+      });
+      context.strokeStyle = `rgba(${instance.group.color.join(",")},${(.04 + .16 * eased) * opacity})`;
+      context.lineWidth = 0.7;
+      context.stroke();
+
+      instance.nodes.forEach((node) => {
+        const twinkle = .55 + (Math.sin(time * .001 + node.phase) + 1) * .16;
+        context.globalAlpha = twinkle * (.28 + eased * .52) * opacity;
+        context.beginPath();
+        context.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        context.fillStyle = instance.group.color[0] === 167 || instance.group.color[0] === 192 ? "#e7dcff" : "#d8f5ff";
+        context.fill();
+      });
+    });
     context.globalAlpha = 1;
-    hasDrawn = true;
   }
 
   function frame(now) {
     if (!running) return;
     if (previousFrame) activeTime += Math.min(now - previousFrame, 50);
     previousFrame = now;
-    const groupIndex = Math.floor(activeTime / CYCLE_MS) % groups.length;
-    if (groupIndex !== previousGroupIndex) {
-      let nextIndex = groupIndex;
-      if (previousGroupIndex >= 0 && nextIndex === previousGroupIndex) nextIndex = (nextIndex + 1) % groups.length;
-      setGroup(nextIndex, previousGroupIndex >= 0);
-      previousGroupIndex = nextIndex;
-    }
     draw();
     animationFrame = window.requestAnimationFrame(frame);
   }
@@ -160,7 +204,7 @@
     running = true;
     previousFrame = 0;
     if (reducedMotion.matches) {
-      activeTime = FORMATION_MS;
+      activeTime = SPAWN_INTERVAL_MS * 2;
       draw();
       return;
     }
@@ -182,7 +226,7 @@
   function handleMotionPreference() {
     stop();
     if (reducedMotion.matches) {
-      activeTime = FORMATION_MS;
+      activeTime = Math.max(activeTime, SPAWN_INTERVAL_MS * 2);
       draw();
     } else start();
   }
@@ -193,7 +237,6 @@
   reducedMotion.addEventListener?.("change", handleMotionPreference);
   if (!document.hidden) start();
 })();
-
 (() => {
   const canvas = document.getElementById("starfield");
   const context = canvas.getContext("2d", { alpha: true });
