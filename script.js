@@ -746,6 +746,81 @@
     });
   });
 
+  document.querySelectorAll("[data-execution-log]").forEach((log) => {
+    const rows = [...log.querySelectorAll(".execution-row")];
+    if (rows.length < 2) return;
+    let activeIndex = 0;
+    window.setInterval(() => {
+      if (document.hidden) return;
+      rows[activeIndex].classList.remove("is-current");
+      activeIndex = (activeIndex + 1) % rows.length;
+      rows[activeIndex].classList.add("is-current");
+    }, 2200);
+  });
+
+  document.querySelectorAll("[data-network-lab]").forEach((lab) => {
+    let hoveredEntity = null;
+    let focusedEntity = null;
+
+    function applyEntityHighlight() {
+      const entity = hoveredEntity || focusedEntity;
+      lab.classList.toggle("has-entity-focus", Boolean(entity));
+      const activeRelations = new Set();
+      const relatedEntities = new Set(entity ? [entity] : []);
+      if (entity) {
+        lab.querySelectorAll("[data-rel]").forEach((element) => {
+          const relation = element.dataset.rel.split(/\s+/);
+          if (!relation.includes(entity)) return;
+          activeRelations.add(element);
+          relation.forEach((name) => relatedEntities.add(name));
+        });
+      }
+      lab.querySelectorAll("[data-entity]").forEach((element) => {
+        element.classList.toggle("is-highlighted", relatedEntities.has(element.dataset.entity));
+      });
+      lab.querySelectorAll("[data-rel]").forEach((element) => {
+        element.classList.toggle("is-highlighted", activeRelations.has(element));
+      });
+    }
+
+    function entityAt(target) {
+      if (!(target instanceof Element)) return null;
+      const element = target.closest("[data-entity]");
+      return element && lab.contains(element) ? element : null;
+    }
+
+    lab.addEventListener("pointerover", (event) => {
+      const element = entityAt(event.target);
+      if (element) {
+        hoveredEntity = element.dataset.entity;
+        applyEntityHighlight();
+      }
+    }, { passive: true });
+    lab.addEventListener("pointerout", (event) => {
+      const leaving = entityAt(event.target);
+      const entering = entityAt(event.relatedTarget);
+      if (leaving !== entering) {
+        hoveredEntity = entering?.dataset.entity || null;
+        applyEntityHighlight();
+      }
+    }, { passive: true });
+    lab.addEventListener("focusin", (event) => {
+      const element = entityAt(event.target);
+      if (element) {
+        focusedEntity = element.dataset.entity;
+        applyEntityHighlight();
+      }
+    });
+    lab.addEventListener("focusout", (event) => {
+      const leaving = entityAt(event.target);
+      const entering = entityAt(event.relatedTarget);
+      if (leaving !== entering) {
+        focusedEntity = entering?.dataset.entity || null;
+        applyEntityHighlight();
+      }
+    });
+  });
+
   const navToggle = document.querySelector(".nav-toggle");
   const mainNav = document.getElementById("main-navigation");
   const navBackdrop = document.querySelector(".nav-backdrop");
