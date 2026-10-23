@@ -13,7 +13,7 @@
   const LINE_INTRO_MS = 6000;
   const INSTANCE_LIFETIME_MS = FORMATION_MS + FADE_MS;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const anchors = [[.2, .3], [.78, .32], [.5, .72], [.22, .73], [.76, .73]];
+  const anchors = [[.2, .3], [.78, .3], [.5, .72]];
   const groups = [
     { color: [56, 189, 248], size: 1, points: [[-1, 0], [-.45, -.65], [.2, -.8], [.85, -.35], [.75, .4], [.05, .75], [-.7, .5]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [1, 6], [6, 5]] },
     { color: [167, 139, 250], size: 1, points: [[-1, -.45], [-.35, -.8], [.35, -.6], [.95, -.05], [.55, .65], [-.2, .85], [-.75, .35]], links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0], [2, 5]] },
@@ -266,11 +266,36 @@
   let meteor = null;
   let nextMeteorAt = null;
 
+  function balancedPosition(randomY = true) {
+    const columns = Math.max(1, Math.ceil(Math.sqrt(targetCount * width / Math.max(height, 1))));
+    const rows = Math.max(1, Math.ceil(targetCount / columns));
+    const occupancy = Array(columns * rows).fill(0);
+    stars.forEach((star) => {
+      const x = Math.max(0, Math.min(width - 1, star.x));
+      const y = Math.max(0, Math.min(height - 1, star.y));
+      const column = Math.min(columns - 1, Math.floor(x / width * columns));
+      const row = Math.min(rows - 1, Math.floor(y / height * rows));
+      occupancy[row * columns + column] += 1;
+    });
+    const leastOccupied = Math.min(...occupancy);
+    const candidates = occupancy.flatMap((count, index) => count === leastOccupied ? [index] : []);
+    const cell = candidates[Math.floor(Math.random() * candidates.length)];
+    const column = cell % columns;
+    const row = Math.floor(cell / columns);
+    const jitterX = .14 + Math.random() * .72;
+    const jitterY = .14 + Math.random() * .72;
+    return {
+      x: (column + jitterX) * width / columns,
+      y: randomY ? (row + jitterY) * height / rows : -10,
+    };
+  }
+
   function makeStar(randomY = true) {
     const radius = 1.9 + Math.random() * 1.6;
+    const position = balancedPosition(randomY);
     return {
-      x: Math.random() * width,
-      y: randomY ? Math.random() * height : -10,
+      x: position.x,
+      y: position.y,
       radius,
       speed: 0.65 + Math.random() * 0.55,
       drift: (Math.random() - 0.5) * 0.55,
@@ -296,7 +321,7 @@
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-    targetCount = width <= 640 ? 24 : Math.min(55, Math.max(32, Math.round((width * height) / 16000)));
+    targetCount = width <= 640 ? 27 : Math.min(60, Math.max(35, Math.round((width * height) / 14500)));
     while (stars.length < targetCount) stars.push(makeStar());
     while (stars.length > targetCount) stars.pop();
     ensureAmbientMovers();
