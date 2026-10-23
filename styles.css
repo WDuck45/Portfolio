@@ -283,7 +283,7 @@ h2 { margin-bottom: 0; font: normal clamp(29px, 4vw, 42px)/1.2 var(--font-displa
 .debt-toggle:focus-visible { outline: 2px solid #4adeb5; outline-offset: 2px; }
 .debt-edge-complex { transform-box: fill-box; transform-origin: center; transition: opacity .55s ease, transform .65s cubic-bezier(.2,.75,.2,1); }
 .debt-after { opacity: .32; transform: translate3d(0,3px,0); transition: opacity .55s ease, transform .65s cubic-bezier(.2,.75,.2,1); }
-.debt-edge-net { stroke: #4adeb5; stroke-dasharray: 110; stroke-dashoffset: 110; opacity: .16; transition: stroke-dashoffset .7s cubic-bezier(.2,.75,.2,1), opacity .35s ease; filter: drop-shadow(0 0 3px rgba(74,222,181,.48)); }
+.debt-edge-net { stroke: #4adeb5; stroke-dasharray: 2000; stroke-dashoffset: 2000; opacity: .16; transition: stroke-dashoffset .7s cubic-bezier(.2,.75,.2,1), opacity .35s ease; filter: drop-shadow(0 0 3px rgba(74,222,181,.48)); }
 .edge-arrowhead { stroke: #4adeb5; }
 .net-label { fill: #8cf0d1; }
 .debt-panel:is([data-state="settled"], :hover) .debt-edge-complex { opacity: .08; transform: translate3d(8px,0,0) scale(.9); }
@@ -423,3 +423,22 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
   .signal-path { animation: none; stroke-dasharray: none; }
   .signal-path-model { stroke-dasharray: 6 5; }
 }
+
+/* Member-graph tags: skills and education show different data on the graph */
+.node-tags { pointer-events: none; }
+.node-tag { opacity: 0; transition: opacity .25s ease, transform .25s ease; transform: translate3d(0,3px,0); }
+.node-tag rect { fill: #0a1b30; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.node-tag text { font: 500 6.5px var(--font-mono); text-anchor: middle; dominant-baseline: central; }
+.node-tag-skill rect { stroke: rgba(167,139,250,.7); }
+.node-tag-skill text { fill: #eee5ff; }
+.node-tag-education rect { stroke: rgba(94,234,212,.7); }
+.node-tag-education text { fill: #d9fffb; }
+.node-tag-skill { transition-delay: calc(var(--i, 0) * 28ms); }
+.node-tag-education { transition-delay: calc(var(--i, 0) * 28ms); }
+.network-lab[data-focus="skills"] .node-tag-skill,
+.network-lab[data-focus="education"] .node-tag-education { opacity: 1; transform: translate3d(0,0,0); }
+.network-lab[data-focus="skills"] .network-node circle { stroke: #b19aff; }
+.network-lab[data-focus="education"] .network-node circle { stroke: #5eead4; }
+.network-lab[data-focus="skills"] .network-node.is-highlighted circle { fill: #1c1840; stroke: #b19aff; filter: drop-shadow(0 0 5px rgba(167,139,250,.55)); }
+.network-lab[data-focus="education"] .network-node.is-highlighted circle { fill: #0b2b2f; stroke: #5eead4; filter: drop-shadow(0 0 5px rgba(94,234,212,.5)); }
+@media (prefers-reduced-motion: reduce) { .node-tag { transition: none; } }

@@ -831,9 +831,55 @@
     let selectedEntity = null;
     let selectedNode = null;
 
+    // Skills and education each get their own labels on the member graph.
+    const graph = lab.querySelector(".network-graph");
+    const tagData = {
+      A: ["Web Dev", "CSE"], B: ["Python", "ECE"], C: ["ML", "AI&ML"], D: ["SQL", "EEE"],
+      E: ["React", "IT"], F: ["DevOps", "Robotics"], G: ["Embedded", "Maths"], H: ["Data Viz", "Cyber Sec"], I: ["Cloud", "Physics"],
+    };
+    if (graph) {
+      const ns = "http://www.w3.org/2000/svg";
+      const layer = document.createElementNS(ns, "g");
+      layer.setAttribute("class", "node-tags");
+      layer.setAttribute("aria-hidden", "true");
+      let n = 0;
+      graph.querySelectorAll(".network-node:not(.node-center)").forEach((node) => {
+        const letter = node.querySelector("text")?.textContent.trim();
+        const pair = tagData[letter];
+        const m = /translate\(([-\d.]+)[ ,]+([-\d.]+)\)/.exec(node.getAttribute("transform") || "");
+        if (!pair || !m) return;
+        const x = Number(m[1]);
+        const y = Number(m[2]);
+        const r = Number(node.querySelector("circle")?.getAttribute("r") || 10);
+        const dy = (y < 111 ? 1 : -1) * (r + 9);
+        ["skill", "education"].forEach((kind, k) => {
+          const label = pair[k];
+          const w = label.length * 4.2 + 10;
+          const g = document.createElementNS(ns, "g");
+          g.setAttribute("class", `node-tag node-tag-${kind}`);
+          g.style.setProperty("--i", String(n));
+          const rect = document.createElementNS(ns, "rect");
+          rect.setAttribute("x", String(x - w / 2));
+          rect.setAttribute("y", String(y + dy - 6));
+          rect.setAttribute("width", String(w));
+          rect.setAttribute("height", "12");
+          rect.setAttribute("rx", "6");
+          const text = document.createElementNS(ns, "text");
+          text.setAttribute("x", String(x));
+          text.setAttribute("y", String(y + dy));
+          text.textContent = label;
+          g.append(rect, text);
+          layer.append(g);
+        });
+        n += 1;
+      });
+      graph.append(layer);
+    }
+
     function applyEntityHighlight() {
       const entity = hoveredEntity || focusedEntity || selectedEntity;
       lab.classList.toggle("has-entity-focus", Boolean(entity));
+      lab.dataset.focus = entity || "";
       const activeRelations = new Set();
       const relatedEntities = new Set(entity ? [entity] : []);
       if (entity) {

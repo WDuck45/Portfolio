@@ -268,7 +268,7 @@
                 <article class="schema-table" data-entity="skills" tabindex="0" aria-label="Skills table"><h4>SKILLS</h4><p><b>FK</b> user_id</p><p>skill_name</p></article>
                 <article class="schema-table" data-entity="education" tabindex="0" aria-label="Education table"><h4>EDUCATION</h4><p><b>FK</b> user_id</p><p>institution · degree</p></article>
               </div>
-              <div class="foreign-key-paths"><span data-rel="users connections">users.id → connections.user_id</span><span data-rel="users skills">users.id → skills.user_id</span><span data-rel="users education">users.id → education.user_id</span></div>
+              <div class="foreign-key-paths"><span data-entity="connections" data-rel="users connections">users.id → connections.user_id</span><span data-entity="skills" data-rel="users skills">users.id → skills.user_id</span><span data-entity="education" data-rel="users education">users.id → education.user_id</span></div>
             </section>
           </div>
           <div class="project-footer"><div class="chip-row"><span>Database design</span><span>Team project</span></div></div>
