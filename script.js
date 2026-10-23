@@ -144,17 +144,17 @@
     for (let index = 0; index < dustCount; index += 1) {
       const particle = dust[index];
       const t = activeTime * .00018 + particle.phase;
-      const x = particle.x + Math.sin(t) * 13;
-      const y = particle.y + Math.cos(t * .83) * 13;
+      const x = particle.x + Math.sin(t) * 5;
+      const y = particle.y + Math.cos(t * .83) * 5;
       const twinkle = .55 + (Math.sin(activeTime * .001 + particle.phase) + 1) * .16;
-      context.globalAlpha = twinkle * .28;
+      context.globalAlpha = twinkle * .18;
       context.beginPath();
       context.arc(x, y, particle.radius, 0, Math.PI * 2);
       context.fillStyle = "#c8d8f5";
       context.fill();
     }
 
-    const driftAmount = 13;
+    const driftAmount = 1.8;
     const time = reducedMotion.matches ? 0 : activeTime;
     const easingTime = reducedMotion.matches ? 1 : undefined;
     const fadeStart = FORMATION_MS;
