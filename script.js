@@ -192,7 +192,8 @@
   document.addEventListener("visibilitychange", handleVisibility);
   reducedMotion.addEventListener?.("change", handleMotionPreference);
   if (!document.hidden) start();
-})()
+})();
+
 (() => {
   const canvas = document.getElementById("starfield");
   const context = canvas.getContext("2d", { alpha: true });
@@ -208,6 +209,7 @@
   let height = 0;
   let pixelRatio = 1;
   let targetCount = 0;
+  const MAX_EXTRA_STARS = 7;
   let activeStar = null;
   let touchInputActive = false;
   let pointer = { x: 0, y: 0, lastX: 0, lastY: 0, lastTime: 0 };
@@ -260,7 +262,7 @@
         movingCount += 1;
       }
     }
-    while (movingCount < 7) {
+    while (movingCount < 7 && stars.length < targetCount + MAX_EXTRA_STARS) {
       const star = makeStar(false);
       star.ambientMover = true;
       stars.push(star);
