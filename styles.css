@@ -35,7 +35,7 @@ a { color: inherit; text-decoration: none; }
 .wordmark { font: 800 20px/1 var(--font-display); letter-spacing: -.08em; color: var(--ink); }
 .wordmark span { color: var(--accent); }
 .main-nav { display: flex; gap: clamp(22px, 4vw, 48px); align-items: center; }
-.main-nav .mobile-download { display: none; }
+.main-nav .header-download { color: var(--ink); }
 .main-nav a { color: var(--muted); font-size: 12px; transition: color .2s ease; }
 .main-nav a:hover, .header-download:hover, .text-link:hover, .site-footer a:hover { color: var(--accent-light); }
 .header-actions { display: flex; align-items: center; gap: 12px; position: relative; z-index: 3; }
@@ -193,15 +193,23 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
   .spotlight-card { cursor: default; }
 }
 
+@media (min-width: 761px) and (max-width: 980px) {
+  .site-header { padding-inline: 24px; }
+  .main-nav { gap: clamp(8px, 1.2vw, 12px); }
+  .main-nav a { font-size: 10px; }
+  .header-actions { gap: 8px; }
+  .header-social-link { display: none; }
+  .header-download { padding: 8px 10px; font-size: 11px; }
+}
+
 @media (max-width: 760px) {
   .site-header { height: 64px; padding-inline: 22px; }
-  .header-download { display: none; }
   .nav-toggle { display: grid; }
   .main-nav { display: none; position: absolute; z-index: 2; top: calc(100% + 8px); left: 18px; right: 18px; align-items: stretch; flex-direction: column; gap: 2px; padding: 12px; border: 1px solid rgba(56,189,248,.16); border-radius: 16px; background: rgba(7,14,31,.96); box-shadow: 0 20px 60px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.04); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
   .main-nav.is-open { display: flex; }
   .main-nav a { display: flex; align-items: center; min-height: 42px; padding: 0 12px; border-radius: 9px; font-size: 13px; }
   .main-nav a:hover { background: rgba(255,255,255,.045); }
-  .main-nav .mobile-download { display: flex; justify-content: space-between; margin-top: 7px; border: 1px solid rgba(56,189,248,.2); background: rgba(56,189,248,.08); color: var(--ink); }
+  .main-nav .header-download { display: flex; justify-content: space-between; margin-top: 7px; border: 1px solid rgba(56,189,248,.2); background: rgba(56,189,248,.08); color: var(--ink); }
   .nav-backdrop:not([hidden]) { display: block; position: fixed; z-index: 0; inset: 64px 0 0; width: 100%; border: 0; background: rgba(1,4,12,.48); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
   .section-wrap { width: min(100% - 40px, 600px); }
   .hero { min-height: auto; padding-top: 80px; padding-bottom: 66px; align-items: stretch; gap: 34px; }

@@ -649,7 +649,6 @@
     if (!activeStar) return;
     const { x, y } = localPoint(event);
     moveActiveStar(x, y);
-    event.preventDefault();
   }
 
   function onTouchStart(event) {
@@ -663,26 +662,33 @@
     window.clearTimeout(touchHoldTimer);
     touchHoldTimer = window.setTimeout(() => {
       if (!pendingTouch || activeStar) return;
-      if (beginStarDrag(pendingTouch.x, pendingTouch.y)) pendingTouch = null;
+      if (beginStarDrag(pendingTouch.x, pendingTouch.y)) {
+        pendingTouch = null;
+        document.addEventListener("touchmove", onActiveTouchMove, { passive: false });
+      }
     }, 160);
   }
 
   function onTouchMove(event) {
+    if (activeStar || !pendingTouch) return;
+    const touch = event.touches[0];
+    if (touch && Math.hypot(touch.clientX - pendingTouch.x, touch.clientY - pendingTouch.y) > 8) {
+      window.clearTimeout(touchHoldTimer);
+      pendingTouch = null;
+    }
+  }
+
+  function onActiveTouchMove(event) {
+    if (!activeStar) return;
     const touch = event.touches[0];
     if (!touch) return;
-    if (!activeStar) {
-      if (pendingTouch && Math.hypot(touch.clientX - pendingTouch.x, touch.clientY - pendingTouch.y) > 8) {
-        window.clearTimeout(touchHoldTimer);
-        pendingTouch = null;
-      }
-      return;
-    }
     moveActiveStar(touch.clientX, touch.clientY);
     event.preventDefault();
   }
 
   function onTouchEnd() {
     window.clearTimeout(touchHoldTimer);
+    document.removeEventListener("touchmove", onActiveTouchMove);
     pendingTouch = null;
     onPointerUp();
     touchInputActive = false;
@@ -770,13 +776,13 @@
   resize();
   window.addEventListener("resize", resize, { passive: true });
   document.addEventListener("pointerdown", onPointerDown);
-  document.addEventListener("pointermove", onPointerMove, { passive: false });
+  document.addEventListener("pointermove", onPointerMove, { passive: true });
   document.addEventListener("pointerup", onPointerUp);
   document.addEventListener("pointercancel", onPointerUp);
   // Pointer Events cover modern touch browsers; these explicit touch listeners
   // keep dragging dependable on mobile browsers that still synthesize pointers.
-  document.addEventListener("touchstart", onTouchStart, { passive: false });
-  document.addEventListener("touchmove", onTouchMove, { passive: false });
+  document.addEventListener("touchstart", onTouchStart, { passive: true });
+  document.addEventListener("touchmove", onTouchMove, { passive: true });
   document.addEventListener("touchend", onTouchEnd, { passive: true });
   document.addEventListener("touchcancel", onTouchEnd, { passive: true });
   reducedMotion.addEventListener?.("change", () => {
