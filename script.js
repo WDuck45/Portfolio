@@ -601,6 +601,33 @@
     });
   });
 
+  const navToggle = document.querySelector(".nav-toggle");
+  const mainNav = document.getElementById("main-navigation");
+  const navBackdrop = document.querySelector(".nav-backdrop");
+  const mobileNavQuery = window.matchMedia("(max-width: 760px)");
+
+  function setMobileNavOpen(open) {
+    if (!navToggle || !mainNav || !navBackdrop) return;
+    mainNav.classList.toggle("is-open", open);
+    navToggle.setAttribute("aria-expanded", String(open));
+    navToggle.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+    navBackdrop.hidden = !open;
+  }
+
+  navToggle?.addEventListener("click", () => {
+    setMobileNavOpen(navToggle.getAttribute("aria-expanded") !== "true");
+  });
+  navBackdrop?.addEventListener("click", () => setMobileNavOpen(false));
+  mainNav?.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => setMobileNavOpen(false));
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setMobileNavOpen(false);
+  });
+  mobileNavQuery.addEventListener?.("change", (event) => {
+    if (!event.matches) setMobileNavOpen(false);
+  });
+
   resize();
   window.addEventListener("resize", resize, { passive: true });
   document.addEventListener("pointerdown", onPointerDown);
