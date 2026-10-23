@@ -51,6 +51,7 @@
   let previousFrame = 0;
   let animationFrame = 0;
   let running = false;
+  let isIntersecting = true;
   let nextSpawnAt = 0;
   let lastGroupIndex = -1;
   let formationIndex = 0;
@@ -224,9 +225,12 @@
     animationFrame = 0;
   }
 
-  function handleVisibility() {
-    if (document.hidden) stop();
-    else start();
+  function syncAnimation() {
+    if (document.hidden || !isIntersecting) {
+      stop();
+      return;
+    }
+    start();
   }
 
   function handleMotionPreference() {
@@ -234,14 +238,21 @@
     if (reducedMotion.matches) {
       activeTime = Math.max(activeTime, SPAWN_INTERVAL_MS * 2);
       draw();
-    } else start();
+    } else syncAnimation();
   }
 
   resize();
   window.addEventListener("resize", resize, { passive: true });
-  document.addEventListener("visibilitychange", handleVisibility);
+  document.addEventListener("visibilitychange", syncAnimation, { passive: true });
   reducedMotion.addEventListener?.("change", handleMotionPreference);
-  if (!document.hidden) start();
+  if ("IntersectionObserver" in window) {
+    const canvasObserver = new IntersectionObserver((entries) => {
+      isIntersecting = entries.some((entry) => entry.isIntersecting);
+      syncAnimation();
+    }, { threshold: 0 });
+    canvasObserver.observe(canvas);
+  }
+  syncAnimation();
 })();
 (() => {
   const canvas = document.getElementById("starfield");
@@ -266,6 +277,8 @@
   let touchHoldTimer = 0;
   let pointer = { x: 0, y: 0, lastX: 0, lastY: 0, lastTime: 0 };
   let animationFrame = 0;
+  let running = false;
+  let isIntersecting = true;
   let meteor = null;
   let nextMeteorAt = null;
 
@@ -537,6 +550,7 @@
   }
 
   function frame(time) {
+    if (!running) return;
     context.clearRect(0, 0, width, height);
     drawMeteor(time);
     for (let i = stars.length - 1; i >= 0; i -= 1) {
@@ -594,7 +608,19 @@
     resolveCollisions(time);
     while (stars.length < targetCount) stars.push(makeStar());
     ensureAmbientMovers();
-    animationFrame = window.requestAnimationFrame(frame);
+    if (running) animationFrame = window.requestAnimationFrame(frame);
+  }
+
+  function syncAnimation() {
+    const shouldRun = isIntersecting && !document.hidden;
+    if (shouldRun && !running) {
+      running = true;
+      animationFrame = window.requestAnimationFrame(frame);
+    } else if (!shouldRun && running) {
+      running = false;
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+    }
   }
 
   function localPoint(event) {
@@ -746,24 +772,62 @@
     });
   });
 
-  document.querySelectorAll("[data-execution-log]").forEach((log) => {
-    const rows = [...log.querySelectorAll(".execution-row")];
-    if (rows.length < 2) return;
-    let activeIndex = 0;
-    window.setInterval(() => {
-      if (document.hidden) return;
-      rows[activeIndex].classList.remove("is-current");
-      activeIndex = (activeIndex + 1) % rows.length;
-      rows[activeIndex].classList.add("is-current");
-    }, 2200);
+  document.querySelectorAll("[data-debt-panel]").forEach((panel) => {
+    const toggle = panel.querySelector("[data-debt-toggle]");
+    toggle?.addEventListener("click", () => {
+      const settled = panel.dataset.state !== "settled";
+      panel.dataset.state = settled ? "settled" : "before";
+      toggle.setAttribute("aria-pressed", String(settled));
+      toggle.textContent = settled ? "RESET FLOW" : "RUN SETTLEMENT";
+    });
   });
+
+  const animatedProjects = [...document.querySelectorAll("[data-animated-project]")];
+  const projectVisibility = new Map();
+  const telemetryTimers = new WeakMap();
+
+  function setProjectAnimationState(project, inView) {
+    const visible = inView && !document.hidden;
+    project.classList.toggle("is-visible", visible);
+    const rows = [...project.querySelectorAll("[data-execution-log] .execution-row")];
+    if (!rows.length) return;
+    if (visible && !telemetryTimers.has(project)) {
+      const timer = window.setInterval(() => {
+        if (document.hidden) return;
+        const activeIndex = rows.findIndex((row) => row.classList.contains("is-current"));
+        rows[activeIndex < 0 ? 0 : activeIndex].classList.remove("is-current");
+        rows[(activeIndex + 1) % rows.length].classList.add("is-current");
+      }, 2200);
+      telemetryTimers.set(project, timer);
+    } else if (!visible && telemetryTimers.has(project)) {
+      window.clearInterval(telemetryTimers.get(project));
+      telemetryTimers.delete(project);
+    }
+  }
+
+  if ("IntersectionObserver" in window) {
+    const projectObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        projectVisibility.set(entry.target, entry.isIntersecting);
+        setProjectAnimationState(entry.target, entry.isIntersecting);
+      });
+    }, { threshold: 0.08, rootMargin: "80px 0px" });
+    animatedProjects.forEach((project) => projectObserver.observe(project));
+    document.addEventListener("visibilitychange", () => {
+      animatedProjects.forEach((project) => setProjectAnimationState(project, projectVisibility.get(project) || false));
+    }, { passive: true });
+  } else {
+    animatedProjects.forEach((project) => setProjectAnimationState(project, true));
+  }
 
   document.querySelectorAll("[data-network-lab]").forEach((lab) => {
     let hoveredEntity = null;
     let focusedEntity = null;
+    let selectedEntity = null;
+    let selectedNode = null;
 
     function applyEntityHighlight() {
-      const entity = hoveredEntity || focusedEntity;
+      const entity = hoveredEntity || focusedEntity || selectedEntity;
       lab.classList.toggle("has-entity-focus", Boolean(entity));
       const activeRelations = new Set();
       const relatedEntities = new Set(entity ? [entity] : []);
@@ -780,6 +844,9 @@
       });
       lab.querySelectorAll("[data-rel]").forEach((element) => {
         element.classList.toggle("is-highlighted", activeRelations.has(element));
+      });
+      lab.querySelectorAll(".network-node[role=button]").forEach((node) => {
+        node.setAttribute("aria-pressed", String(node === selectedNode));
       });
     }
 
@@ -818,6 +885,20 @@
         focusedEntity = entering?.dataset.entity || null;
         applyEntityHighlight();
       }
+    });
+    lab.addEventListener("click", (event) => {
+      const node = event.target instanceof Element ? event.target.closest(".network-node[role=button]") : null;
+      if (!node) return;
+      selectedNode = selectedNode === node ? null : node;
+      selectedEntity = selectedNode?.dataset.entity || null;
+      applyEntityHighlight();
+    });
+    lab.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const node = event.target instanceof Element ? event.target.closest(".network-node[role=button]") : null;
+      if (!node) return;
+      event.preventDefault();
+      node.click();
     });
   });
 
@@ -860,9 +941,14 @@
   document.addEventListener("touchmove", onTouchMove, { passive: true });
   document.addEventListener("touchend", onTouchEnd, { passive: true });
   document.addEventListener("touchcancel", onTouchEnd, { passive: true });
-  reducedMotion.addEventListener?.("change", () => {
-    window.cancelAnimationFrame(animationFrame);
-    animationFrame = window.requestAnimationFrame(frame);
-  });
-  animationFrame = window.requestAnimationFrame(frame);
+  reducedMotion.addEventListener?.("change", syncAnimation);
+  document.addEventListener("visibilitychange", syncAnimation, { passive: true });
+  if ("IntersectionObserver" in window) {
+    const canvasObserver = new IntersectionObserver((entries) => {
+      isIntersecting = entries.some((entry) => entry.isIntersecting);
+      syncAnimation();
+    }, { threshold: 0 });
+    canvasObserver.observe(canvas);
+  }
+  syncAnimation();
 })();
