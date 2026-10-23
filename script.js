@@ -303,6 +303,7 @@
       vy: 0,
       collisionMotion: false,
       collisionSettled: false,
+      settleAfterCollision: false,
       trail: [],
       launched: false,
       ambientMover: stars.filter((star) => star.ambientMover && !star.launched && !star.held).length < 7,
@@ -436,23 +437,29 @@
 
         const firstMass = first.radius * first.radius;
         const secondMass = second.radius * second.radius;
-        const restitution = 0.9;
+        const restitution = 0.86;
         const impulse = -(1 + restitution) * relativeNormal / (1 / firstMass + 1 / secondMass);
         const firstAfterX = firstVx - (impulse / firstMass) * nx;
         const firstAfterY = firstVy - (impulse / firstMass) * ny;
         const secondAfterX = secondVx + (impulse / secondMass) * nx;
         const secondAfterY = secondVy + (impulse / secondMass) * ny;
 
-        for (const [star, vx, vy] of [
-          [first, firstAfterX, firstAfterY],
-          [second, secondAfterX, secondAfterY],
+        for (const [star, vx, vy, direction] of [
+          [first, firstAfterX, firstAfterY, -1],
+          [second, secondAfterX, secondAfterY, 1],
         ]) {
+          const speed = Math.hypot(vx, vy);
+          const settles = Math.random() < 0.22;
+          const cruiseSpeed = settles ? speed : Math.max(speed, 0.9);
+          const angle = speed > 0.001 ? Math.atan2(vy, vx) : Math.atan2(ny * direction, nx * direction);
+
           star.ambientMover = false;
-          star.vx = vx;
-          star.vy = vy;
+          star.vx = Math.cos(angle) * cruiseSpeed;
+          star.vy = Math.sin(angle) * cruiseSpeed;
           star.collisionMotion = true;
           star.collisionSettled = false;
-          if (Math.hypot(vx, vy) < 0.18) {
+          star.settleAfterCollision = settles;
+          if (settles && cruiseSpeed < 0.18) {
             star.launched = false;
             star.vx = 0;
             star.vy = 0;
@@ -528,13 +535,16 @@
       } else if (star.launched) {
         star.x += star.vx;
         star.y += star.vy;
-        const drag = star.collisionMotion ? 0.992 : 0.999;
+        const drag = star.collisionMotion
+          ? (star.settleAfterCollision ? 0.992 : 1)
+          : 0.999;
         star.vx *= drag;
         star.vy *= drag;
-        if (star.collisionMotion && Math.hypot(star.vx, star.vy) < 0.18) {
+        if (star.collisionMotion && star.settleAfterCollision && Math.hypot(star.vx, star.vy) < 0.18) {
           star.launched = false;
           star.collisionMotion = false;
           star.collisionSettled = true;
+          star.settleAfterCollision = false;
           star.vx = 0;
           star.vy = 0;
           star.trail.length = 0;
@@ -595,6 +605,7 @@
     activeStar.ambientMover = false;
     activeStar.collisionMotion = false;
     activeStar.collisionSettled = false;
+    activeStar.settleAfterCollision = false;
     pointer = { x, y, lastX: x, lastY: y, lastTime: performance.now() };
     return true;
   }
