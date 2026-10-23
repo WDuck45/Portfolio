@@ -235,7 +235,7 @@ h2 { margin-bottom: 0; font: normal clamp(29px, 4vw, 42px)/1.2 var(--font-displa
 .schema-table p { margin: 3px 0 0; color: #8290a4; font: 7px/1.5 var(--font-mono); overflow-wrap: anywhere; }
 .schema-table p b { color: #b19aff; font-weight: 500; }
 .foreign-key-paths { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.foreign-key-paths span { padding: 4px 6px; border: 1px solid rgba(255,255,255,.055); border-radius: 5px; color: #8493a9; background: rgba(255,255,255,.012); font: 7px/1.4 var(--font-mono); transition: color .2s ease, border-color .2s ease, background .2s ease, opacity .2s ease; }
+.foreign-key-paths span { padding: 4px 6px; border: 1px solid rgba(255,255,255,.055); border-radius: 5px; color: #8493a9; background: rgba(255,255,255,.012); font: 7px/1.4 var(--font-mono); display: inline-flex; transform: translate3d(0,0,0); transition: color .2s ease, border-color .2s ease, background .2s ease, opacity .2s ease, transform .2s ease, box-shadow .2s ease; }
 .network-lab.has-entity-focus [data-entity], .network-lab.has-entity-focus [data-rel] { opacity: .3; }
 .network-lab [data-entity].is-highlighted, .network-lab [data-rel].is-highlighted { opacity: 1 !important; }
 .network-lab .schema-table.is-highlighted { border-color: rgba(56,189,248,.48); background: rgba(56,189,248,.07); box-shadow: 0 0 15px rgba(56,189,248,.09); }
@@ -243,9 +243,14 @@ h2 { margin-bottom: 0; font: normal clamp(29px, 4vw, 42px)/1.2 var(--font-displa
 .network-lab .network-node.is-highlighted circle { fill: #123550; stroke: #72ddff; filter: drop-shadow(0 0 5px rgba(56,189,248,.5)); }
 .network-lab .network-edge.is-highlighted { stroke: #64d9ff; filter: drop-shadow(0 0 3px rgba(56,189,248,.6)); }
 .network-lab .schema-table.active { position: relative; z-index: 1; transform: scale(1.025); border-color: rgba(56,189,248,.58); background: rgba(56,189,248,.085); box-shadow: inset 0 0 0 1px rgba(56,189,248,.12), 0 0 17px rgba(56,189,248,.13); }
+.network-lab .schema-table[data-entity="skills"].active { border-color: rgba(167,139,250,.62); background: rgba(167,139,250,.1); box-shadow: inset 0 0 0 1px rgba(167,139,250,.14), 0 0 17px rgba(167,139,250,.15); }
+.network-lab .schema-table[data-entity="education"].active { border-color: rgba(94,234,212,.6); background: rgba(94,234,212,.09); box-shadow: inset 0 0 0 1px rgba(94,234,212,.12), 0 0 17px rgba(94,234,212,.14); }
 .network-lab .network-node.active circle { fill: #123550; stroke: #8be7ff; filter: drop-shadow(0 0 6px rgba(56,189,248,.7)); }
 .network-lab .network-edge.active { stroke: #78e1ff; opacity: 1; }
-.network-lab .foreign-key-paths [data-rel].active { color: #e1f8ff; border-color: rgba(56,189,248,.48); background: rgba(56,189,248,.1); box-shadow: 0 0 11px rgba(56,189,248,.12); }
+.network-lab .foreign-key-paths [data-rel].active { color: #e1f8ff; border-color: rgba(56,189,248,.48); background: rgba(56,189,248,.1); box-shadow: 0 0 11px rgba(56,189,248,.12); transform: translate3d(0,-1px,0); }
+.network-lab .foreign-key-paths [data-rel~="connections"].active { color: #d8f5ff; border-color: rgba(56,189,248,.55); background: rgba(56,189,248,.1); box-shadow: 0 0 12px rgba(56,189,248,.14); }
+.network-lab .foreign-key-paths [data-rel~="skills"].active { color: #eee5ff; border-color: rgba(167,139,250,.6); background: rgba(167,139,250,.11); box-shadow: 0 0 12px rgba(167,139,250,.17); }
+.network-lab .foreign-key-paths [data-rel~="education"].active { color: #d9fffb; border-color: rgba(94,234,212,.56); background: rgba(94,234,212,.1); box-shadow: 0 0 12px rgba(94,234,212,.15); }
 @keyframes lab-pulse { 50% { opacity: .4; } }
 @keyframes network-flow { to { stroke-dashoffset: -48; } }
 @media (max-width: 760px) {
@@ -278,7 +283,7 @@ h2 { margin-bottom: 0; font: normal clamp(29px, 4vw, 42px)/1.2 var(--font-displa
 .debt-toggle:focus-visible { outline: 2px solid #4adeb5; outline-offset: 2px; }
 .debt-edge-complex { transform-box: fill-box; transform-origin: center; transition: opacity .55s ease, transform .65s cubic-bezier(.2,.75,.2,1); }
 .debt-after { opacity: .32; transform: translate3d(0,3px,0); transition: opacity .55s ease, transform .65s cubic-bezier(.2,.75,.2,1); }
-.debt-edge-net { stroke: #4adeb5; stroke-dasharray: 100; stroke-dashoffset: 100; opacity: .16; transition: stroke-dashoffset .7s cubic-bezier(.2,.75,.2,1), opacity .35s ease; filter: drop-shadow(0 0 3px rgba(74,222,181,.48)); }
+.debt-edge-net { stroke: #4adeb5; stroke-dasharray: 110; stroke-dashoffset: 110; opacity: .16; transition: stroke-dashoffset .7s cubic-bezier(.2,.75,.2,1), opacity .35s ease; filter: drop-shadow(0 0 3px rgba(74,222,181,.48)); }
 .edge-arrowhead { stroke: #4adeb5; }
 .net-label { fill: #8cf0d1; }
 .debt-panel:is([data-state="settled"], :hover) .debt-edge-complex { opacity: .08; transform: translate3d(8px,0,0) scale(.9); }
