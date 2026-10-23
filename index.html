@@ -184,51 +184,57 @@
             </div>
             <div class="project-contribution"><span class="mini-label">ENGINEERING SCOPE</span><p>FastAPI services · REST endpoints · MySQL schema</p></div>
           </div>
-          <div class="project-visual smart-lab" data-animated-project role="group" aria-label="SmartSplit backend architecture and settlement visualization">
-            <div class="visual-heading"><span>SETTLEMENT ENGINE</span><span class="visual-status"><i></i> SIMULATED SYSTEM TRACE</span></div>
-            <div class="architecture-flow" role="img" aria-label="Expense input flows through FastAPI and settles in MySQL">
-              <div class="flow-node"><span>01 · INPUT</span><strong>Group expense</strong><small>Receipt · split rules</small></div>
-              <svg class="flow-arrow" viewBox="0 0 38 12" aria-hidden="true"><path class="flow-arrow-track" d="M2 6H34"/><path class="flow-arrow-head" d="m29 2 5 4-5 4"/><path class="flow-packet-line" d="M2 6H31"/></svg>
-              <div class="flow-node flow-api"><span>02 · API SERVER</span><strong>FastAPI app</strong><small>Uvicorn worker · settle engine</small></div>
-              <svg class="flow-arrow" viewBox="0 0 38 12" aria-hidden="true"><path class="flow-arrow-track" d="M2 6H34"/><path class="flow-arrow-head" d="m29 2 5 4-5 4"/><path class="flow-packet-line" d="M2 6H31"/></svg>
-              <div class="flow-node"><span>03 · PERSISTENCE</span><strong>MySQL</strong><small>Groups · expenses · transfers</small></div>
-            </div>
-            <div class="smart-output-grid">
-              <section class="mini-lab-panel debt-panel" data-debt-panel data-state="before" aria-labelledby="debt-graph-title">
-                <div class="mini-panel-heading"><span id="debt-graph-title">DEBT SETTLEMENT</span><button class="debt-toggle" type="button" data-debt-toggle aria-pressed="false">RUN SETTLEMENT</button></div>
-                <div class="debt-graphs">
-                  <figure class="debt-before">
-                    <figcaption>BEFORE · 3 DEBTS</figcaption>
-                    <svg viewBox="0 0 180 112" role="img" aria-label="Before settlement: A owes B 20, B owes C 20, and A owes C 10">
-                      <defs><marker id="debt-before-arrow" viewBox="0 0 6 6" refX="6" refY="3" markerWidth="4" markerHeight="4" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 6 3 0 6" fill="none" stroke="#8298b4" stroke-width="1"/></marker></defs>
-                      <path class="debt-edge debt-edge-complex" marker-end="url(#debt-before-arrow)" d="M35 53H79"/><path class="debt-edge debt-edge-complex" marker-end="url(#debt-before-arrow)" d="M101 53H145"/><path class="debt-edge debt-edge-complex" marker-end="url(#debt-before-arrow)" d="M31 61C62 99 119 99 149.4 61.8"/>
-                      <text class="edge-label" x="57" y="47">$20</text><text class="edge-label" x="123" y="47">$20</text><text class="edge-label" x="90" y="104">$10</text>
-                      <circle class="graph-node" cx="24" cy="53" r="11"/><circle class="graph-node" cx="90" cy="53" r="11"/><circle class="graph-node" cx="156" cy="53" r="11"/>
-                      <text class="node-label" x="24" y="57">A</text><text class="node-label" x="90" y="57">B</text><text class="node-label" x="156" y="57">C</text>
-                    </svg>
-                  </figure>
-                  <figure class="debt-after">
-                    <figcaption>AFTER · 1 PAYMENT</figcaption>
-                    <svg viewBox="0 0 180 112" role="img" aria-label="After settlement: A pays C a net 30">
-                      <defs><marker id="debt-after-arrow" viewBox="0 0 6 6" refX="6" refY="3" markerWidth="5" markerHeight="5" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 6 3 0 6" fill="none" stroke="#4adeb5" stroke-width="1.3"/></marker></defs>
-                      <path class="debt-edge debt-edge-net" marker-end="url(#debt-after-arrow)" d="M35 53H145"/>
-                      <text class="edge-label net-label" x="90" y="43">$30</text>
-                      <circle class="graph-node graph-node-active" cx="24" cy="53" r="11"/><circle class="graph-node graph-node-active" cx="156" cy="53" r="11"/>
-                      <text class="node-label" x="24" y="57">A</text><text class="node-label" x="156" y="57">C</text>
-                    </svg>
-                  </figure>
-                </div>
-              </section>
-              <section class="mini-lab-panel execution-panel" aria-label="Simulated API execution log">
-                <div class="mini-panel-heading"><span>API EXECUTION</span><span>SIMULATED · MS</span></div>
-                <div class="execution-log" data-execution-log>
-                  <div class="execution-row is-current"><i></i><code>GET /groups</code><span>19 ms</span></div>
-                  <div class="execution-row"><i></i><code>POST /settle</code><span>29 ms</span></div>
-                  <div class="execution-row"><i></i><code>GET /expenses</code><span>12 ms</span></div>
-                </div>
-              </section>
-            </div>
+          <details class="project-inspector">
+            <summary class="project-inspector-trigger">
+              <span class="inspector-command"><span class="inspector-bolt" aria-hidden="true">⚡</span><span>Inspect Backend Architecture &amp; Settlement Engine</span></span>
+              <span class="inspector-side"><i class="inspector-live-dot" aria-hidden="true"></i><span class="inspector-state"><span>EXPAND</span><span>COLLAPSE</span></span><svg class="inspector-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m3 6 5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </summary>
+            <div class="project-visual smart-lab" data-animated-project role="group" aria-label="SmartSplit backend architecture and settlement visualization">
+              <div class="visual-heading"><span>SETTLEMENT ENGINE</span><span class="visual-status"><i></i> SIMULATED SYSTEM TRACE</span></div>
+              <div class="architecture-flow" role="img" aria-label="Expense input flows through FastAPI and settles in MySQL">
+                <div class="flow-node"><span>01 · INPUT</span><strong>Group expense</strong><small>Receipt · split rules</small></div>
+                <svg class="flow-arrow" viewBox="0 0 38 12" aria-hidden="true"><path class="flow-arrow-track" d="M2 6H34"/><path class="flow-arrow-head" d="m29 2 5 4-5 4"/><path class="flow-packet-line" d="M2 6H31"/></svg>
+                <div class="flow-node flow-api"><span>02 · API SERVER</span><strong>FastAPI app</strong><small>Uvicorn worker · settle engine</small></div>
+                <svg class="flow-arrow" viewBox="0 0 38 12" aria-hidden="true"><path class="flow-arrow-track" d="M2 6H34"/><path class="flow-arrow-head" d="m29 2 5 4-5 4"/><path class="flow-packet-line" d="M2 6H31"/></svg>
+                <div class="flow-node"><span>03 · PERSISTENCE</span><strong>MySQL</strong><small>Groups · expenses · transfers</small></div>
+              </div>
+              <div class="smart-output-grid">
+                <section class="mini-lab-panel debt-panel" data-debt-panel data-state="before" aria-labelledby="debt-graph-title">
+                  <div class="mini-panel-heading"><span id="debt-graph-title">DEBT SETTLEMENT</span><button class="debt-toggle" type="button" data-debt-toggle aria-pressed="false">RUN SETTLEMENT</button></div>
+                  <div class="debt-graphs">
+                    <figure class="debt-before">
+                      <figcaption>BEFORE · 3 DEBTS</figcaption>
+                      <svg viewBox="0 0 180 112" role="img" aria-label="Before settlement: A owes B 20, B owes C 20, and A owes C 10">
+                        <defs><marker id="debt-before-arrow" viewBox="0 0 6 6" refX="6" refY="3" markerWidth="4" markerHeight="4" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 6 3 0 6" fill="none" stroke="#8298b4" stroke-width="1"/></marker></defs>
+                        <path class="debt-edge debt-edge-complex" marker-end="url(#debt-before-arrow)" d="M35 53H79"/><path class="debt-edge debt-edge-complex" marker-end="url(#debt-before-arrow)" d="M101 53H145"/><path class="debt-edge debt-edge-complex" marker-end="url(#debt-before-arrow)" d="M31 61C62 99 119 99 149.4 61.8"/>
+                        <text class="edge-label" x="57" y="47">$20</text><text class="edge-label" x="123" y="47">$20</text><text class="edge-label" x="90" y="104">$10</text>
+                        <circle class="graph-node" cx="24" cy="53" r="11"/><circle class="graph-node" cx="90" cy="53" r="11"/><circle class="graph-node" cx="156" cy="53" r="11"/>
+                        <text class="node-label" x="24" y="57">A</text><text class="node-label" x="90" y="57">B</text><text class="node-label" x="156" y="57">C</text>
+                      </svg>
+                    </figure>
+                    <figure class="debt-after">
+                      <figcaption>AFTER · 1 PAYMENT</figcaption>
+                      <svg viewBox="0 0 180 112" role="img" aria-label="After settlement: A pays C a net 30">
+                        <defs><marker id="debt-after-arrow" viewBox="0 0 6 6" refX="6" refY="3" markerWidth="5" markerHeight="5" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 6 3 0 6" fill="none" stroke="#4adeb5" stroke-width="1.3"/></marker></defs>
+                        <path class="debt-edge debt-edge-net" marker-end="url(#debt-after-arrow)" d="M35 53H145"/>
+                        <text class="edge-label net-label" x="90" y="43">$30</text>
+                        <circle class="graph-node graph-node-active" cx="24" cy="53" r="11"/><circle class="graph-node graph-node-active" cx="156" cy="53" r="11"/>
+                        <text class="node-label" x="24" y="57">A</text><text class="node-label" x="156" y="57">C</text>
+                      </svg>
+                    </figure>
+                  </div>
+                </section>
+                <section class="mini-lab-panel execution-panel" aria-label="Simulated API execution log">
+                  <div class="mini-panel-heading"><span>API EXECUTION</span><span>SIMULATED · MS</span></div>
+                  <div class="execution-log" data-execution-log>
+                    <div class="execution-row is-current"><i></i><code>GET /groups</code><span>19 ms</span></div>
+                    <div class="execution-row"><i></i><code>POST /settle</code><span>29 ms</span></div>
+                    <div class="execution-row"><i></i><code>GET /expenses</code><span>12 ms</span></div>
+                  </div>
+                </section>
+              </div>
           </div>
+          </details>
           <div class="project-footer"><div class="chip-row"><span>FastAPI</span><span>MySQL</span><span>Backend</span></div><a class="project-link" href="https://github.com/WDuck45/SmartSplit-AI" target="_blank" rel="noreferrer">View on GitHub <span aria-hidden="true">↗</span></a></div>
         </article>
         <article class="project-card project-secondary spotlight-card">
@@ -237,40 +243,46 @@
             <div><h3>Professional networking app</h3><p class="project-summary">A LinkedIn-style team project that organizes member profiles and professional connections.</p></div>
             <div class="project-contribution"><span class="mini-label">MY CONTRIBUTION</span><p>Designed database storage for profiles, education details, and connections.</p></div>
           </div>
-          <div class="project-visual network-lab" data-network-lab data-animated-project role="group" aria-label="Interactive professional network graph and relational schema">
-            <div class="visual-heading"><span>CONNECTION ENGINE</span><span class="visual-status"><i></i> RELATIONAL MAP</span></div>
-            <section class="mini-lab-panel network-panel" aria-labelledby="network-graph-title">
-              <div class="mini-panel-heading"><span id="network-graph-title">MEMBER GRAPH</span><span>FOCUS A NODE TO TRACE ITS DATA</span></div>
-              <svg class="network-graph" viewBox="0 0 360 222" role="group" aria-label="Interactive network map. Focus, hover, or tap a member to trace its relational data.">
-                <g class="network-edges">
-                  <path class="network-edge degree-one" data-rel="users connections" d="M180 111 91 58M180 111 269 58M180 111 91 164M180 111 269 164" />
-                  <path class="network-edge degree-two" data-rel="users connections" d="M91 58 36 25M269 58 324 25M91 164 36 197M269 164 324 197" />
-                  <path class="network-edge degree-three" data-rel="users connections" d="M36 25 180 15M324 25 180 15" />
-                </g>
-                <g class="network-node node-center" role="button" aria-pressed="false" transform="translate(180 111)" tabindex="0" data-entity="users" aria-label="Your profile, user record"><g class="node-float"><circle r="19"/><text y="4">YOU</text></g></g>
-                <g class="network-node degree-one-node" role="button" aria-pressed="false" transform="translate(91 58)" tabindex="0" data-entity="users" aria-label="First-degree member"><g class="node-float"><circle r="13"/><text y="4">A</text></g></g>
-                <g class="network-node degree-one-node" role="button" aria-pressed="false" transform="translate(269 58)" tabindex="0" data-entity="users" aria-label="First-degree member"><g class="node-float"><circle r="13"/><text y="4">B</text></g></g>
-                <g class="network-node degree-one-node" role="button" aria-pressed="false" transform="translate(91 164)" tabindex="0" data-entity="users" aria-label="First-degree member"><g class="node-float"><circle r="13"/><text y="4">C</text></g></g>
-                <g class="network-node degree-one-node" role="button" aria-pressed="false" transform="translate(269 164)" tabindex="0" data-entity="users" aria-label="First-degree member"><g class="node-float"><circle r="13"/><text y="4">D</text></g></g>
-                <g class="network-node degree-two-node" role="button" aria-pressed="false" transform="translate(36 25)" tabindex="0" data-entity="users" aria-label="Second-degree member"><g class="node-float"><circle r="10"/><text y="3">E</text></g></g>
-                <g class="network-node degree-two-node" role="button" aria-pressed="false" transform="translate(324 25)" tabindex="0" data-entity="users" aria-label="Second-degree member"><g class="node-float"><circle r="10"/><text y="3">F</text></g></g>
-                <g class="network-node degree-two-node" role="button" aria-pressed="false" transform="translate(36 197)" tabindex="0" data-entity="users" aria-label="Second-degree member"><g class="node-float"><circle r="10"/><text y="3">G</text></g></g>
-                <g class="network-node degree-two-node" role="button" aria-pressed="false" transform="translate(324 197)" tabindex="0" data-entity="users" aria-label="Second-degree member"><g class="node-float"><circle r="10"/><text y="3">H</text></g></g>
-                <g class="network-node degree-three-node" role="button" aria-pressed="false" transform="translate(180 15)" tabindex="0" data-entity="users" aria-label="Third-degree member"><g class="node-float"><circle r="8"/><text y="3">I</text></g></g>
-              </svg>
-              <div class="network-legend"><span><i class="legend-first"></i>1st degree</span><span><i class="legend-second"></i>2nd degree</span><span><i class="legend-third"></i>3rd degree</span></div>
-            </section>
-            <section class="mini-lab-panel schema-panel" aria-labelledby="schema-title">
-              <div class="mini-panel-heading"><span id="schema-title">RELATIONAL SCHEMA</span><span>MYSQL · FOREIGN KEYS</span></div>
-              <div class="schema-grid">
-                <article class="schema-table" data-entity="users" tabindex="0" aria-label="Users table"><h4>USERS</h4><p><b>PK</b> id</p><p>name · email · bio</p></article>
-                <article class="schema-table" data-entity="connections" tabindex="0" aria-label="Connections table"><h4>CONNECTIONS</h4><p><b>FK</b> user_id</p><p><b>FK</b> connected_user_id</p></article>
-                <article class="schema-table" data-entity="skills" tabindex="0" aria-label="Skills table"><h4>SKILLS</h4><p><b>FK</b> user_id</p><p>skill_name</p></article>
-                <article class="schema-table" data-entity="education" tabindex="0" aria-label="Education table"><h4>EDUCATION</h4><p><b>FK</b> user_id</p><p>institution · degree</p></article>
-              </div>
-              <div class="foreign-key-paths"><span data-entity="connections" data-rel="users connections">users.id → connections.user_id</span><span data-entity="skills" data-rel="users skills">users.id → skills.user_id</span><span data-entity="education" data-rel="users education">users.id → education.user_id</span></div>
-            </section>
+          <details class="project-inspector">
+            <summary class="project-inspector-trigger">
+              <span class="inspector-command"><span class="inspector-bolt" aria-hidden="true">⚡</span><span>Inspect Relational Schema &amp; Connection Engine</span></span>
+              <span class="inspector-side"><i class="inspector-live-dot" aria-hidden="true"></i><span class="inspector-state"><span>EXPAND</span><span>COLLAPSE</span></span><svg class="inspector-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m3 6 5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </summary>
+            <div class="project-visual network-lab" data-network-lab data-animated-project role="group" aria-label="Interactive professional network graph and relational schema">
+              <div class="visual-heading"><span>CONNECTION ENGINE</span><span class="visual-status"><i></i> RELATIONAL MAP</span></div>
+              <section class="mini-lab-panel network-panel" aria-labelledby="network-graph-title">
+                <div class="mini-panel-heading"><span id="network-graph-title">MEMBER GRAPH</span><span>FOCUS A NODE TO TRACE ITS DATA</span></div>
+                <svg class="network-graph" viewBox="0 0 360 222" role="group" aria-label="Interactive network map. Focus, hover, or tap a member to trace its relational data.">
+                  <g class="network-edges">
+                    <path class="network-edge degree-one" data-rel="users connections" d="M180 111 91 58M180 111 269 58M180 111 91 164M180 111 269 164" />
+                    <path class="network-edge degree-two" data-rel="users connections" d="M91 58 36 25M269 58 324 25M91 164 36 197M269 164 324 197" />
+                    <path class="network-edge degree-three" data-rel="users connections" d="M36 25 180 15M324 25 180 15" />
+                  </g>
+                  <g class="network-node node-center" role="button" aria-pressed="false" transform="translate(180 111)" tabindex="0" data-entity="users" aria-label="Your profile, user record"><g class="node-float"><circle r="19"/><text y="4">YOU</text></g></g>
+                  <g class="network-node degree-one-node" role="button" aria-pressed="false" transform="translate(91 58)" tabindex="0" data-entity="users" aria-label="First-degree member"><g class="node-float"><circle r="13"/><text y="4">A</text></g></g>
+                  <g class="network-node degree-one-node" role="button" aria-pressed="false" transform="translate(269 58)" tabindex="0" data-entity="users" aria-label="First-degree member"><g class="node-float"><circle r="13"/><text y="4">B</text></g></g>
+                  <g class="network-node degree-one-node" role="button" aria-pressed="false" transform="translate(91 164)" tabindex="0" data-entity="users" aria-label="First-degree member"><g class="node-float"><circle r="13"/><text y="4">C</text></g></g>
+                  <g class="network-node degree-one-node" role="button" aria-pressed="false" transform="translate(269 164)" tabindex="0" data-entity="users" aria-label="First-degree member"><g class="node-float"><circle r="13"/><text y="4">D</text></g></g>
+                  <g class="network-node degree-two-node" role="button" aria-pressed="false" transform="translate(36 25)" tabindex="0" data-entity="users" aria-label="Second-degree member"><g class="node-float"><circle r="10"/><text y="3">E</text></g></g>
+                  <g class="network-node degree-two-node" role="button" aria-pressed="false" transform="translate(324 25)" tabindex="0" data-entity="users" aria-label="Second-degree member"><g class="node-float"><circle r="10"/><text y="3">F</text></g></g>
+                  <g class="network-node degree-two-node" role="button" aria-pressed="false" transform="translate(36 197)" tabindex="0" data-entity="users" aria-label="Second-degree member"><g class="node-float"><circle r="10"/><text y="3">G</text></g></g>
+                  <g class="network-node degree-two-node" role="button" aria-pressed="false" transform="translate(324 197)" tabindex="0" data-entity="users" aria-label="Second-degree member"><g class="node-float"><circle r="10"/><text y="3">H</text></g></g>
+                  <g class="network-node degree-three-node" role="button" aria-pressed="false" transform="translate(180 15)" tabindex="0" data-entity="users" aria-label="Third-degree member"><g class="node-float"><circle r="8"/><text y="3">I</text></g></g>
+                </svg>
+                <div class="network-legend"><span><i class="legend-first"></i>1st degree</span><span><i class="legend-second"></i>2nd degree</span><span><i class="legend-third"></i>3rd degree</span></div>
+              </section>
+              <section class="mini-lab-panel schema-panel" aria-labelledby="schema-title">
+                <div class="mini-panel-heading"><span id="schema-title">RELATIONAL SCHEMA</span><span>MYSQL · FOREIGN KEYS</span></div>
+                <div class="schema-grid">
+                  <article class="schema-table" data-entity="users" tabindex="0" aria-label="Users table"><h4>USERS</h4><p><b>PK</b> id</p><p>name · email · bio</p></article>
+                  <article class="schema-table" data-entity="connections" tabindex="0" aria-label="Connections table"><h4>CONNECTIONS</h4><p><b>FK</b> user_id</p><p><b>FK</b> connected_user_id</p></article>
+                  <article class="schema-table" data-entity="skills" tabindex="0" aria-label="Skills table"><h4>SKILLS</h4><p><b>FK</b> user_id</p><p>skill_name</p></article>
+                  <article class="schema-table" data-entity="education" tabindex="0" aria-label="Education table"><h4>EDUCATION</h4><p><b>FK</b> user_id</p><p>institution · degree</p></article>
+                </div>
+                <div class="foreign-key-paths"><span data-entity="connections" data-rel="users connections">users.id → connections.user_id</span><span data-entity="skills" data-rel="users skills">users.id → skills.user_id</span><span data-entity="education" data-rel="users education">users.id → education.user_id</span></div>
+              </section>
           </div>
+          </details>
           <div class="project-footer"><div class="chip-row"><span>Database design</span><span>Team project</span></div></div>
         </article>
       </section>
