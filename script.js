@@ -259,6 +259,7 @@
   let pixelRatio = 1;
   let targetCount = 0;
   const MAX_EXTRA_STARS = 7;
+  const MAX_MOVING_STARS = 5;
   let activeStar = null;
   let touchInputActive = false;
   let pointer = { x: 0, y: 0, lastX: 0, lastY: 0, lastTime: 0 };
@@ -290,6 +291,12 @@
     };
   }
 
+  function countAutonomousMovers() {
+    return stars.filter((star) => !star.userThrown && !star.held && (
+      star.ambientMover || (star.launched && star.collisionMotion)
+    )).length;
+  }
+
   function makeStar(randomY = true) {
     const radius = 1.9 + Math.random() * 1.6;
     const position = balancedPosition(randomY);
@@ -306,7 +313,8 @@
       settleAfterCollision: false,
       trail: [],
       launched: false,
-      ambientMover: stars.filter((star) => star.ambientMover && !star.launched && !star.held).length < 7,
+      userThrown: false,
+      ambientMover: countAutonomousMovers() < MAX_MOVING_STARS,
       phase: Math.random() * Math.PI * 2,
       colors: palette[Math.floor(Math.random() * palette.length)],
       held: false,
@@ -329,15 +337,15 @@
   }
 
   function ensureAmbientMovers() {
-    let movingCount = stars.filter((star) => star.ambientMover && !star.launched && !star.held).length;
+    let movingCount = countAutonomousMovers();
     for (const star of stars) {
-      if (movingCount >= 7) break;
-      if (!star.ambientMover && !star.launched && !star.held && !star.collisionSettled) {
+      if (movingCount >= MAX_MOVING_STARS) break;
+      if (!star.ambientMover && !star.launched && !star.held && !star.collisionSettled && !star.userThrown) {
         star.ambientMover = true;
         movingCount += 1;
       }
     }
-    while (movingCount < 7 && stars.length < targetCount + MAX_EXTRA_STARS) {
+    while (movingCount < MAX_MOVING_STARS && stars.length < targetCount + MAX_EXTRA_STARS) {
       const star = makeStar(false);
       star.ambientMover = true;
       stars.push(star);
@@ -449,7 +457,9 @@
           [second, secondAfterX, secondAfterY, 1],
         ]) {
           const speed = Math.hypot(vx, vy);
-          const settles = Math.random() < 0.22;
+          const alreadyCounted = !star.userThrown && !star.held && (star.ambientMover || (star.launched && star.collisionMotion));
+          const atMovingLimit = countAutonomousMovers() >= MAX_MOVING_STARS && !alreadyCounted && !star.userThrown;
+          const settles = atMovingLimit || Math.random() < 0.22;
           const cruiseSpeed = settles ? speed : Math.max(speed, 0.9);
           const angle = speed > 0.001 ? Math.atan2(vy, vx) : Math.atan2(ny * direction, nx * direction);
 
@@ -606,6 +616,7 @@
     activeStar.collisionMotion = false;
     activeStar.collisionSettled = false;
     activeStar.settleAfterCollision = false;
+    activeStar.userThrown = false;
     pointer = { x, y, lastX: x, lastY: y, lastTime: performance.now() };
     return true;
   }
@@ -664,6 +675,7 @@
     if (!activeStar) return;
     activeStar.held = false;
     activeStar.launched = Math.hypot(activeStar.vx, activeStar.vy) > 0.5;
+    activeStar.userThrown = activeStar.launched;
     if (!activeStar.launched) {
       activeStar.vx = 0;
       activeStar.vy = 0;
