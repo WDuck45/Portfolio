@@ -29,7 +29,28 @@ a { color: inherit; text-decoration: none; }
 ::selection { background: rgba(56,189,248,.28); color: white; }
 .ambient-glow { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(420px circle at var(--pointer-x, 50%) var(--pointer-y, 45%), rgba(56,189,248,.055), transparent 70%), radial-gradient(320px circle at 82% 22%, rgba(167,139,250,.035), transparent 72%); }
 .constellation-field { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; opacity: .78; }
-.starfield { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: auto; touch-action: pan-y; }
+.starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+body.is-star-dragging,
+body.is-star-dragging * {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
 .site-header, main, .site-footer { position: relative; z-index: 1; }
 .site-header { height: 74px; padding: 0 max(5vw, calc((100vw - 1180px) / 2)); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(59,130,246,.09); background: rgba(3,7,18,.86); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 5; }
 .wordmark { font: 800 20px/1 var(--font-display); letter-spacing: -.08em; color: var(--ink); }

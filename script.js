@@ -667,7 +667,10 @@
     if (event.button !== 0) return;
     if (event.target instanceof Element && event.target.closest("a, button, input, textarea, select")) return;
     const { x, y } = localPoint(event);
-    beginStarDrag(x, y);
+    if (beginStarDrag(x, y)) {
+      document.body.classList.add("is-star-dragging");
+      if (event.cancelable) event.preventDefault();
+    }
   }
 
   function onPointerMove(event) {
@@ -689,6 +692,7 @@
     touchHoldTimer = window.setTimeout(() => {
       if (!pendingTouch || activeStar) return;
       if (beginStarDrag(pendingTouch.x, pendingTouch.y)) {
+        document.body.classList.add("is-star-dragging");
         pendingTouch = null;
         document.addEventListener("touchmove", onActiveTouchMove, { passive: false });
       }
@@ -721,6 +725,7 @@
   }
 
   function onPointerUp() {
+    document.body.classList.remove("is-star-dragging");
     if (!activeStar) return;
     activeStar.held = false;
     activeStar.launched = Math.hypot(activeStar.vx, activeStar.vy) > 0.5;
