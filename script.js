@@ -279,12 +279,18 @@
   const desktopQuery = window.matchMedia("(min-width: 1024px)");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const latencySamples = [10, 12, 11, 14];
+  let hudIsVisible = !("IntersectionObserver" in window);
   let latencyIndex = 1;
   let clockTimer = 0;
   let latencyTimer = 0;
 
+  if (hudIsVisible) hud.classList.add("is-visible");
+
   if (desktopQuery.matches && !reducedMotion.matches) {
     hud.classList.add("is-booting");
+    hud.querySelector(".telemetry-stats > div:last-child")?.addEventListener("animationend", () => {
+      hud.classList.remove("is-booting");
+    }, { once: true });
     window.requestAnimationFrame(() => hud.classList.add("is-booted"));
   }
 
@@ -297,7 +303,7 @@
   }
 
   function scheduleLatency() {
-    if (!latencyValue || document.hidden || !desktopQuery.matches) return;
+    if (!latencyValue || document.hidden || !desktopQuery.matches || !hudIsVisible) return;
     latencyTimer = window.setTimeout(() => {
       latencyValue.classList.add("is-updating");
       latencyTimer = window.setTimeout(() => {
@@ -311,7 +317,7 @@
   }
 
   function startClock() {
-    if (document.hidden || !desktopQuery.matches || clockTimer) return;
+    if (document.hidden || !desktopQuery.matches || !hudIsVisible || clockTimer) return;
     updateClock();
     clockTimer = window.setInterval(updateClock, 1000);
     scheduleLatency();
@@ -326,8 +332,17 @@
   }
 
   function syncClock() {
-    if (document.hidden || !desktopQuery.matches) stopClock();
+    if (document.hidden || !desktopQuery.matches || !hudIsVisible) stopClock();
     else startClock();
+  }
+
+  if ("IntersectionObserver" in window) {
+    const hudObserver = new IntersectionObserver(([entry]) => {
+      hudIsVisible = entry.isIntersecting;
+      hud.classList.toggle("is-visible", hudIsVisible);
+      syncClock();
+    }, { threshold: 0.05 });
+    hudObserver.observe(hud);
   }
 
   document.addEventListener("visibilitychange", syncClock, { passive: true });
@@ -357,6 +372,7 @@
   const MAX_EXTRA_STARS = 7;
   const MAX_MOVING_STARS = 5;
   let activeStar = null;
+  let capturedPointerId = null;
   let touchInputActive = false;
   let pendingTouch = null;
   let touchHoldTimer = 0;
@@ -787,6 +803,8 @@
     const { x, y } = localPoint(event);
     if (beginStarDrag(x, y)) {
       document.body.classList.add("is-star-dragging");
+      capturedPointerId = event.pointerId;
+      try { canvas.setPointerCapture(capturedPointerId); } catch { capturedPointerId = null; }
       if (event.cancelable) event.preventDefault();
     }
   }
@@ -853,6 +871,13 @@
   }
 
   function onPointerUp() {
+    document.removeEventListener("touchmove", onActiveTouchMove);
+    if (capturedPointerId !== null) {
+      try {
+        if (canvas.hasPointerCapture(capturedPointerId)) canvas.releasePointerCapture(capturedPointerId);
+      } catch { /* Capture may already have been released by the browser. */ }
+      capturedPointerId = null;
+    }
     if (dragMoveFrame && activeStar) moveActiveStar(dragMoveX, dragMoveY);
     if (dragMoveFrame) window.cancelAnimationFrame(dragMoveFrame);
     dragMoveFrame = 0;
@@ -867,6 +892,16 @@
       activeStar.trailCount = 0;
     }
     activeStar = null;
+  }
+
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      window.clearTimeout(touchHoldTimer);
+      pendingTouch = null;
+      touchInputActive = false;
+      onPointerUp();
+    }
+    syncAnimation();
   }
 
   if (!reducedMotion.matches) {
@@ -1135,6 +1170,8 @@
   document.addEventListener("pointermove", onPointerMove, { passive: true });
   document.addEventListener("pointerup", onPointerUp);
   document.addEventListener("pointercancel", onPointerUp);
+  document.addEventListener("mouseleave", onPointerUp);
+  window.addEventListener("blur", onPointerUp);
   // Pointer Events cover modern touch browsers; these explicit touch listeners
   // keep dragging dependable on mobile browsers that still synthesize pointers.
   document.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -1142,7 +1179,7 @@
   document.addEventListener("touchend", onTouchEnd, { passive: true });
   document.addEventListener("touchcancel", onTouchEnd, { passive: true });
   reducedMotion.addEventListener?.("change", syncAnimation);
-  document.addEventListener("visibilitychange", syncAnimation, { passive: true });
+  document.addEventListener("visibilitychange", handleVisibilityChange, { passive: true });
   if ("IntersectionObserver" in window) {
     const canvasObserver = new IntersectionObserver((entries) => {
       isIntersecting = entries.some((entry) => entry.isIntersecting);
