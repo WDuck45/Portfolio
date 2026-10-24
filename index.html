@@ -60,6 +60,34 @@
 
     <main>
       <section class="hero section-wrap" id="home">
+        <aside class="hero-name-constellation" id="hero-name-constellation" aria-hidden="true">
+          <svg class="hero-name-constellation__svg" viewBox="0 0 360 138" role="presentation">
+            <defs>
+              <filter id="hero-star-glow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="2.4" result="blur" />
+                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
+            <path class="hero-name-constellation__route" d="M18 22 42 16 65 23 91 15 115 23 142 17 164 23 188 16 212 23 238 16 262 22 286 15 313 22 339 16" />
+            <text class="hero-name-constellation__word hero-name-constellation__word--first" x="16" y="66">AKARSH</text>
+            <text class="hero-name-constellation__word hero-name-constellation__word--last" x="16" y="105">SHAURYA</text>
+            <path class="hero-name-constellation__link" d="M20 119 56 124 96 117 137 124 177 117 217 124 260 117 300 123 337 117" />
+            <g class="hero-name-constellation__nodes" filter="url(#hero-star-glow)">
+              <circle style="--node-delay: 4.9s" cx="18" cy="22" r="2.2" />
+              <circle style="--node-delay: 5.5s" cx="65" cy="23" r="1.8" />
+              <circle style="--node-delay: 6.1s" cx="115" cy="23" r="2.3" />
+              <circle style="--node-delay: 6.7s" cx="164" cy="23" r="1.8" />
+              <circle style="--node-delay: 7.3s" cx="212" cy="23" r="2.2" />
+              <circle style="--node-delay: 7.9s" cx="262" cy="22" r="1.8" />
+              <circle style="--node-delay: 8.5s" cx="313" cy="22" r="2.3" />
+              <circle style="--node-delay: 9.1s" cx="337" cy="117" r="1.9" />
+              <circle style="--node-delay: 9.7s" cx="217" cy="124" r="1.7" />
+              <circle style="--node-delay: 10.1s" cx="96" cy="117" r="2.1" />
+            </g>
+            <circle class="hero-name-constellation__spark" cx="330" cy="91" r="1.4" />
+            <circle class="hero-name-constellation__spark hero-name-constellation__spark--small" cx="7" cy="90" r="1" />
+          </svg>
+        </aside>
         <div class="hero-copy">
           <p class="eyebrow"><span class="status-dot"></span> Computer Science &amp; Engineering · VIT Vellore</p>
           <h1>A curious man in this<br /><span>fascinating World</span></h1>

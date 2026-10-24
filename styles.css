@@ -616,3 +616,75 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .button .down-arrow-icon { margin-left: 5px; }
 
 .beyond-arrow-mark { display: block; width: 21px; height: 21px; }
+
+/* Hero name constellation: a quiet decorative detail in the headline's side space. */
+.hero-copy, .mdp-card { position: relative; z-index: 2; }
+.hero-name-constellation {
+  position: absolute;
+  z-index: 1;
+  top: clamp(125px, 12vw, 178px);
+  right: clamp(0px, 1.4vw, 22px);
+  width: min(30%, 360px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(0, 8px, 0);
+  transition: opacity 1.1s ease, transform 1.1s ease, visibility 0s linear 1.1s;
+}
+.hero-name-constellation.is-active {
+  opacity: .76;
+  visibility: visible;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 0s;
+}
+.hero-name-constellation__svg { display: block; width: 100%; height: auto; overflow: visible; }
+.hero-name-constellation__route,
+.hero-name-constellation__link {
+  fill: none;
+  stroke: rgba(125, 211, 252, .34);
+  stroke-width: .8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+}
+.hero-name-constellation__link { stroke: rgba(167, 139, 250, .26); stroke-width: .65; }
+.hero-name-constellation__word {
+  fill: transparent;
+  stroke: rgba(203, 232, 255, .78);
+  stroke-width: .7;
+  stroke-dasharray: 460;
+  stroke-dashoffset: 460;
+  paint-order: stroke;
+  font-family: var(--font-display);
+  font-size: 33px;
+  font-weight: 700;
+  letter-spacing: 5px;
+  filter: drop-shadow(0 0 7px rgba(56, 189, 248, .18));
+}
+.hero-name-constellation__word--last { stroke: rgba(196, 181, 253, .74); }
+.hero-name-constellation__nodes circle {
+  fill: #dff6ff;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.hero-name-constellation__spark { fill: #c4b5fd; opacity: .72; filter: drop-shadow(0 0 5px rgba(167, 139, 250, .8)); animation: hero-constellation-twinkle 3.4s ease-in-out infinite; }
+.hero-name-constellation__spark--small { animation-delay: 1.7s; }
+.hero-name-constellation.is-started .hero-name-constellation__route { animation: hero-constellation-route 10.8s ease forwards; }
+.hero-name-constellation.is-started .hero-name-constellation__link { animation: hero-constellation-route 10.8s ease 1s forwards; }
+.hero-name-constellation.is-started .hero-name-constellation__word--first { animation: hero-constellation-lettering 10.8s ease .25s forwards; }
+.hero-name-constellation.is-started .hero-name-constellation__word--last { animation: hero-constellation-lettering 10.8s ease 1.15s forwards; }
+.hero-name-constellation.is-started .hero-name-constellation__nodes circle { animation: hero-constellation-node 1.2s ease var(--node-delay) both, hero-constellation-twinkle 3.6s ease-in-out calc(var(--node-delay) + 1.2s) infinite; }
+.hero-name-constellation.is-formed .hero-name-constellation__route,
+.hero-name-constellation.is-formed .hero-name-constellation__link,
+.hero-name-constellation.is-formed .hero-name-constellation__word { stroke-dashoffset: 0; }
+.hero-name-constellation.is-formed .hero-name-constellation__nodes circle { opacity: .9; }
+@keyframes hero-constellation-route { to { stroke-dashoffset: 0; } }
+@keyframes hero-constellation-lettering { 65% { fill: transparent; } 100% { fill: rgba(203, 232, 255, .14); stroke-dashoffset: 0; } }
+@keyframes hero-constellation-node { from { opacity: 0; transform: scale(.25); } to { opacity: .9; transform: scale(1); } }
+@keyframes hero-constellation-twinkle { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+@media (max-width: 1023px) { .hero-name-constellation { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .hero-name-constellation, .hero-name-constellation * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

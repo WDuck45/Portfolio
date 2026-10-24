@@ -264,6 +264,32 @@
   syncAnimation();
 })();
 (() => {
+  const hero = document.getElementById("home");
+  const constellation = document.getElementById("hero-name-constellation");
+  if (!hero || !constellation || !window.matchMedia("(min-width: 1024px)").matches) return;
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let hasStarted = false;
+  let formationTimer = 0;
+  const observer = new IntersectionObserver(([entry]) => {
+    constellation.classList.toggle("is-active", entry.isIntersecting);
+    if (!entry.isIntersecting || hasStarted) return;
+    hasStarted = true;
+    constellation.classList.add("is-started");
+    if (reducedMotion.matches) {
+      constellation.classList.add("is-formed");
+      return;
+    }
+    formationTimer = window.setTimeout(() => constellation.classList.add("is-formed"), 12000);
+  }, { threshold: 0.01 });
+  observer.observe(hero);
+  window.addEventListener("pagehide", () => {
+    observer.disconnect();
+    window.clearTimeout(formationTimer);
+  }, { once: true });
+  window.addEventListener("pageshow", () => observer.observe(hero));
+})();
+(() => {
   const canvas = document.getElementById("starfield");
   const context = canvas.getContext("2d", { alpha: true });
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
