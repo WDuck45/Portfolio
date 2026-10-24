@@ -264,30 +264,48 @@
   syncAnimation();
 })();
 (() => {
-  const hero = document.getElementById("home");
-  const constellation = document.getElementById("hero-name-constellation");
-  if (!hero || !constellation || !window.matchMedia("(min-width: 1024px)").matches) return;
+  const utcClock = document.querySelector('[data-hud-clock="utc"]');
+  const istClock = document.querySelector('[data-hud-clock="ist"]');
+  if (!utcClock || !istClock) return;
 
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let hasStarted = false;
-  let formationTimer = 0;
-  const observer = new IntersectionObserver(([entry]) => {
-    constellation.classList.toggle("is-active", entry.isIntersecting);
-    if (!entry.isIntersecting || hasStarted) return;
-    hasStarted = true;
-    constellation.classList.add("is-started");
-    if (reducedMotion.matches) {
-      constellation.classList.add("is-formed");
-      return;
-    }
-    formationTimer = window.setTimeout(() => constellation.classList.add("is-formed"), 4600);
-  }, { threshold: 0.01 });
-  observer.observe(hero);
-  window.addEventListener("pagehide", () => {
-    observer.disconnect();
-    window.clearTimeout(formationTimer);
-  }, { once: true });
-  window.addEventListener("pageshow", () => observer.observe(hero));
+  const utcFormatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "UTC", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  });
+  const istFormatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  });
+  const desktopQuery = window.matchMedia("(min-width: 1024px)");
+  let clockTimer = 0;
+
+  function updateClock() {
+    const now = new Date();
+    utcClock.textContent = utcFormatter.format(now);
+    istClock.textContent = istFormatter.format(now);
+    utcClock.dateTime = now.toISOString();
+    istClock.dateTime = now.toISOString();
+  }
+
+  function startClock() {
+    if (document.hidden || !desktopQuery.matches || clockTimer) return;
+    updateClock();
+    clockTimer = window.setInterval(updateClock, 1000);
+  }
+
+  function stopClock() {
+    window.clearInterval(clockTimer);
+    clockTimer = 0;
+  }
+
+  function syncClock() {
+    if (document.hidden || !desktopQuery.matches) stopClock();
+    else startClock();
+  }
+
+  document.addEventListener("visibilitychange", syncClock, { passive: true });
+  desktopQuery.addEventListener?.("change", syncClock);
+  window.addEventListener("pagehide", stopClock);
+  window.addEventListener("pageshow", syncClock);
+  syncClock();
 })();
 (() => {
   const canvas = document.getElementById("starfield");
