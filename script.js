@@ -266,7 +266,9 @@
 (() => {
   const utcClock = document.querySelector('[data-hud-clock="utc"]');
   const istClock = document.querySelector('[data-hud-clock="ist"]');
-  if (!utcClock || !istClock) return;
+  const hud = document.querySelector(".hero-telemetry");
+  const latencyValue = document.querySelector("[data-hud-latency]");
+  if (!utcClock || !istClock || !hud) return;
 
   const utcFormatter = new Intl.DateTimeFormat("en-GB", {
     timeZone: "UTC", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
@@ -275,7 +277,14 @@
     timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
   });
   const desktopQuery = window.matchMedia("(min-width: 1024px)");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let clockTimer = 0;
+  let latencyTimer = 0;
+
+  if (desktopQuery.matches && !reducedMotion.matches) {
+    hud.classList.add("is-booting");
+    window.requestAnimationFrame(() => hud.classList.add("is-booted"));
+  }
 
   function updateClock() {
     const now = new Date();
@@ -286,14 +295,21 @@
   }
 
   function startClock() {
-    if (document.hidden || !desktopQuery.matches || clockTimer) return;
+    if (document.hidden || !desktopQuery.matches || clockTimer || latencyTimer) return;
     updateClock();
     clockTimer = window.setInterval(updateClock, 1000);
+    if (latencyValue) {
+      latencyTimer = window.setInterval(() => {
+        latencyValue.textContent = String(11 + Math.floor(Math.random() * 4));
+      }, 2800);
+    }
   }
 
   function stopClock() {
     window.clearInterval(clockTimer);
+    window.clearInterval(latencyTimer);
     clockTimer = 0;
+    latencyTimer = 0;
   }
 
   function syncClock() {
