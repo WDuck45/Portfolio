@@ -622,10 +622,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .hero-name-constellation {
   position: absolute;
   z-index: 1;
-  top: clamp(125px, 12vw, 178px);
+  top: clamp(185px, 17vw, 245px);
   right: clamp(0px, 1.4vw, 22px);
-  width: min(34%, 360px);
-  height: 92px;
+  width: min(45%, 500px);
+  height: 132px;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -633,7 +633,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
   transition: opacity 1.1s ease, transform 1.1s ease, visibility 0s linear 1.1s;
 }
 .hero-name-constellation.is-active {
-  opacity: .76;
+  opacity: .9;
   visibility: visible;
   transform: translate3d(0, 0, 0);
   transition-delay: 0s;
@@ -641,34 +641,37 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .hero-name-constellation__svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .hero-name-constellation__line {
   fill: none;
-  stroke: rgba(174, 226, 255, .54);
-  stroke-width: .62;
+  stroke: rgba(190, 235, 255, .8);
+  stroke-width: 1.05;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 2px rgba(56, 189, 248, .3));
+  filter: drop-shadow(0 0 5px rgba(56, 189, 248, .48));
 }
 .hero-name-constellation__nodes circle {
-  fill: #e5f7ff;
+  fill: #effaff;
   opacity: 0;
   transform-box: fill-box;
   transform-origin: center;
-  filter: drop-shadow(0 0 3px rgba(125, 211, 252, .85));
+  filter: drop-shadow(0 0 5px rgba(125, 211, 252, .95));
 }
 .hero-name-constellation.is-started .hero-name-constellation__line {
-  animation: hero-letter-draw 1.4s ease var(--letter-delay) forwards;
+  animation: hero-letter-draw .85s ease var(--letter-delay) forwards;
 }
 .hero-name-constellation.is-started .hero-name-constellation__nodes circle {
-  animation: hero-node-appear .42s ease calc(var(--letter-delay) + .88s) both,
-    hero-node-twinkle 3.2s ease-in-out calc(var(--letter-delay) + 1.3s) infinite;
+  animation: hero-node-appear .3s ease calc(var(--letter-delay) + .58s) both,
+    hero-node-twinkle 3.2s ease-in-out calc(var(--letter-delay) + .9s) infinite;
 }
 .hero-name-constellation.is-formed .hero-name-constellation__line { stroke-dashoffset: 0; }
 .hero-name-constellation.is-formed .hero-name-constellation__nodes circle { opacity: .92; }
 @keyframes hero-letter-draw { to { stroke-dashoffset: 0; } }
 @keyframes hero-node-appear { from { opacity: 0; transform: scale(.35); } to { opacity: .9; transform: scale(1); } }
 @keyframes hero-node-twinkle { 0%, 100% { opacity: .58; } 50% { opacity: 1; } }
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .hero-name-constellation { width: min(41%, 420px); height: 120px; top: clamp(180px, 18vw, 220px); }
+}
 @media (max-width: 1023px) { .hero-name-constellation { display: none; } }
 @media (prefers-reduced-motion: reduce) {
   .hero-name-constellation, .hero-name-constellation * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
