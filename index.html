@@ -61,31 +61,61 @@
     <main>
       <section class="hero section-wrap" id="home">
         <aside class="hero-name-constellation" id="hero-name-constellation" aria-hidden="true">
-          <svg class="hero-name-constellation__svg" viewBox="0 0 360 138" role="presentation">
-            <defs>
-              <filter id="hero-star-glow" x="-100%" y="-100%" width="300%" height="300%">
-                <feGaussianBlur stdDeviation="2.4" result="blur" />
-                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
-            </defs>
-            <path class="hero-name-constellation__route" d="M18 22 42 16 65 23 91 15 115 23 142 17 164 23 188 16 212 23 238 16 262 22 286 15 313 22 339 16" />
-            <text class="hero-name-constellation__word hero-name-constellation__word--first" x="16" y="66">AKARSH</text>
-            <text class="hero-name-constellation__word hero-name-constellation__word--last" x="16" y="105">SHAURYA</text>
-            <path class="hero-name-constellation__link" d="M20 119 56 124 96 117 137 124 177 117 217 124 260 117 300 123 337 117" />
-            <g class="hero-name-constellation__nodes" filter="url(#hero-star-glow)">
-              <circle style="--node-delay: 4.9s" cx="18" cy="22" r="2.2" />
-              <circle style="--node-delay: 5.5s" cx="65" cy="23" r="1.8" />
-              <circle style="--node-delay: 6.1s" cx="115" cy="23" r="2.3" />
-              <circle style="--node-delay: 6.7s" cx="164" cy="23" r="1.8" />
-              <circle style="--node-delay: 7.3s" cx="212" cy="23" r="2.2" />
-              <circle style="--node-delay: 7.9s" cx="262" cy="22" r="1.8" />
-              <circle style="--node-delay: 8.5s" cx="313" cy="22" r="2.3" />
-              <circle style="--node-delay: 9.1s" cx="337" cy="117" r="1.9" />
-              <circle style="--node-delay: 9.7s" cx="217" cy="124" r="1.7" />
-              <circle style="--node-delay: 10.1s" cx="96" cy="117" r="2.1" />
+          <svg class="hero-name-constellation__svg" viewBox="0 0 360 68" role="presentation">
+            <g class="hero-name-constellation__letters">
+            <g class="hero-name-constellation__letter" transform="translate(9 18)" style="--letter-delay: 0.00s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M0 30 L10 0 L20 30 M4 19 L16 19" />
+              <g class="hero-name-constellation__nodes"><circle cx="0" cy="30" r="1.15" /><circle cx="10" cy="0" r="1.15" /><circle cx="20" cy="30" r="1.15" /><circle cx="4" cy="19" r="1.15" /><circle cx="16" cy="19" r="1.15" /></g>
             </g>
-            <circle class="hero-name-constellation__spark" cx="330" cy="91" r="1.4" />
-            <circle class="hero-name-constellation__spark hero-name-constellation__spark--small" cx="7" cy="90" r="1" />
+            <g class="hero-name-constellation__letter" transform="translate(33.5 18)" style="--letter-delay: 0.75s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M0 0 L0 30 M20 0 L0 15 L20 30" />
+              <g class="hero-name-constellation__nodes"><circle cx="0" cy="0" r="1.15" /><circle cx="0" cy="30" r="1.15" /><circle cx="20" cy="0" r="1.15" /><circle cx="0" cy="15" r="1.15" /><circle cx="20" cy="30" r="1.15" /></g>
+            </g>
+            <g class="hero-name-constellation__letter" transform="translate(58 18)" style="--letter-delay: 1.50s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M0 30 L10 0 L20 30 M4 19 L16 19" />
+              <g class="hero-name-constellation__nodes"><circle cx="0" cy="30" r="1.15" /><circle cx="10" cy="0" r="1.15" /><circle cx="20" cy="30" r="1.15" /><circle cx="4" cy="19" r="1.15" /><circle cx="16" cy="19" r="1.15" /></g>
+            </g>
+            <g class="hero-name-constellation__letter" transform="translate(82.5 18)" style="--letter-delay: 2.25s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M0 30 L0 0 L13 0 L20 5 L20 11 L13 15 L0 15 M12 15 L20 30" />
+              <g class="hero-name-constellation__nodes"><circle cx="0" cy="30" r="1.15" /><circle cx="0" cy="0" r="1.15" /><circle cx="13" cy="0" r="1.15" /><circle cx="20" cy="5" r="1.15" /><circle cx="20" cy="11" r="1.15" /><circle cx="13" cy="15" r="1.15" /><circle cx="0" cy="15" r="1.15" /><circle cx="12" cy="15" r="1.15" /><circle cx="20" cy="30" r="1.15" /></g>
+            </g>
+            <g class="hero-name-constellation__letter" transform="translate(107 18)" style="--letter-delay: 3.00s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M20 0 L5 0 L0 5 L0 10 L20 20 L20 25 L15 30 L0 30" />
+              <g class="hero-name-constellation__nodes"><circle cx="20" cy="0" r="1.15" /><circle cx="5" cy="0" r="1.15" /><circle cx="0" cy="5" r="1.15" /><circle cx="0" cy="10" r="1.15" /><circle cx="20" cy="20" r="1.15" /><circle cx="20" cy="25" r="1.15" /><circle cx="15" cy="30" r="1.15" /><circle cx="0" cy="30" r="1.15" /></g>
+            </g>
+            <g class="hero-name-constellation__letter" transform="translate(131.5 18)" style="--letter-delay: 3.75s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M0 0 L0 30 M20 0 L20 30 M0 15 L20 15" />
+              <g class="hero-name-constellation__nodes"><circle cx="0" cy="0" r="1.15" /><circle cx="0" cy="30" r="1.15" /><circle cx="20" cy="0" r="1.15" /><circle cx="20" cy="30" r="1.15" /><circle cx="0" cy="15" r="1.15" /><circle cx="20" cy="15" r="1.15" /></g>
+            </g>
+            <g class="hero-name-constellation__letter" transform="translate(174 18)" style="--letter-delay: 5.25s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M20 0 L5 0 L0 5 L0 10 L20 20 L20 25 L15 30 L0 30" />
+              <g class="hero-name-constellation__nodes"><circle cx="20" cy="0" r="1.15" /><circle cx="5" cy="0" r="1.15" /><circle cx="0" cy="5" r="1.15" /><circle cx="0" cy="10" r="1.15" /><circle cx="20" cy="20" r="1.15" /><circle cx="20" cy="25" r="1.15" /><circle cx="15" cy="30" r="1.15" /><circle cx="0" cy="30" r="1.15" /></g>
+            </g>
+            <g class="hero-name-constellation__letter" transform="translate(198.5 18)" style="--letter-delay: 6.00s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M0 0 L0 30 M20 0 L20 30 M0 15 L20 15" />
+              <g class="hero-name-constellation__nodes"><circle cx="0" cy="0" r="1.15" /><circle cx="0" cy="30" r="1.15" /><circle cx="20" cy="0" r="1.15" /><circle cx="20" cy="30" r="1.15" /><circle cx="0" cy="15" r="1.15" /><circle cx="20" cy="15" r="1.15" /></g>
+            </g>
+            <g class="hero-name-constellation__letter" transform="translate(223 18)" style="--letter-delay: 6.75s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M0 30 L10 0 L20 30 M4 19 L16 19" />
+              <g class="hero-name-constellation__nodes"><circle cx="0" cy="30" r="1.15" /><circle cx="10" cy="0" r="1.15" /><circle cx="20" cy="30" r="1.15" /><circle cx="4" cy="19" r="1.15" /><circle cx="16" cy="19" r="1.15" /></g>
+            </g>
+            <g class="hero-name-constellation__letter" transform="translate(247.5 18)" style="--letter-delay: 7.50s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M0 0 L0 24 L5 30 L15 30 L20 24 L20 0" />
+              <g class="hero-name-constellation__nodes"><circle cx="0" cy="0" r="1.15" /><circle cx="0" cy="24" r="1.15" /><circle cx="5" cy="30" r="1.15" /><circle cx="15" cy="30" r="1.15" /><circle cx="20" cy="24" r="1.15" /><circle cx="20" cy="0" r="1.15" /></g>
+            </g>
+            <g class="hero-name-constellation__letter" transform="translate(272 18)" style="--letter-delay: 8.25s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M0 30 L0 0 L13 0 L20 5 L20 11 L13 15 L0 15 M12 15 L20 30" />
+              <g class="hero-name-constellation__nodes"><circle cx="0" cy="30" r="1.15" /><circle cx="0" cy="0" r="1.15" /><circle cx="13" cy="0" r="1.15" /><circle cx="20" cy="5" r="1.15" /><circle cx="20" cy="11" r="1.15" /><circle cx="13" cy="15" r="1.15" /><circle cx="0" cy="15" r="1.15" /><circle cx="12" cy="15" r="1.15" /><circle cx="20" cy="30" r="1.15" /></g>
+            </g>
+            <g class="hero-name-constellation__letter" transform="translate(296.5 18)" style="--letter-delay: 9.00s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M0 0 L10 14 L20 0 M10 14 L10 30" />
+              <g class="hero-name-constellation__nodes"><circle cx="0" cy="0" r="1.15" /><circle cx="10" cy="14" r="1.15" /><circle cx="20" cy="0" r="1.15" /><circle cx="10" cy="30" r="1.15" /></g>
+            </g>
+            <g class="hero-name-constellation__letter" transform="translate(321 18)" style="--letter-delay: 9.75s">
+              <path class="hero-name-constellation__line" pathLength="100" d="M0 30 L10 0 L20 30 M4 19 L16 19" />
+              <g class="hero-name-constellation__nodes"><circle cx="0" cy="30" r="1.15" /><circle cx="10" cy="0" r="1.15" /><circle cx="20" cy="30" r="1.15" /><circle cx="4" cy="19" r="1.15" /><circle cx="16" cy="19" r="1.15" /></g>
+            </g>
+            </g>
           </svg>
         </aside>
         <div class="hero-copy">

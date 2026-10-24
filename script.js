@@ -280,7 +280,7 @@
       constellation.classList.add("is-formed");
       return;
     }
-    formationTimer = window.setTimeout(() => constellation.classList.add("is-formed"), 12000);
+    formationTimer = window.setTimeout(() => constellation.classList.add("is-formed"), 11400);
   }, { threshold: 0.01 });
   observer.observe(hero);
   window.addEventListener("pagehide", () => {
