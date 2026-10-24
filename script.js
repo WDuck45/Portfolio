@@ -110,6 +110,15 @@
     }
   }
 
+  let resizeFrame = 0;
+  function scheduleResize() {
+    if (resizeFrame) return;
+    resizeFrame = window.requestAnimationFrame(() => {
+      resizeFrame = 0;
+      resize();
+    });
+  }
+
   function resize() {
     const previousWidth = width || window.innerWidth;
     const previousHeight = height || window.innerHeight;
@@ -242,7 +251,7 @@
   }
 
   resize();
-  window.addEventListener("resize", resize, { passive: true });
+  window.addEventListener("resize", scheduleResize, { passive: true });
   document.addEventListener("visibilitychange", syncAnimation, { passive: true });
   reducedMotion.addEventListener?.("change", handleMotionPreference);
   if ("IntersectionObserver" in window) {
@@ -259,6 +268,9 @@
   const context = canvas.getContext("2d", { alpha: true });
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const stars = [];
+  const starPool = [];
+  const MAX_ACTIVE_STARS = 67;
+  const TRAIL_LENGTH = 10;
   const palette = [
     { core: "#ffffff", mid: "#dff6ff", edge: "#38bdf8", tail: "rgba(56, 189, 248, .46)" },
     { core: "#ffffff", mid: "#eee8ff", edge: "#a78bfa", tail: "rgba(167, 139, 250, .44)" },
@@ -277,6 +289,10 @@
   let touchHoldTimer = 0;
   let pointer = { x: 0, y: 0, lastX: 0, lastY: 0, lastTime: 0 };
   let animationFrame = 0;
+  let dragMoveFrame = 0;
+  let dragMoveX = 0;
+  let dragMoveY = 0;
+  let resizeFrame = 0;
   let running = false;
   let isIntersecting = true;
   let meteor = null;
@@ -307,33 +323,81 @@
   }
 
   function countAutonomousMovers() {
-    return stars.filter((star) => !star.userThrown && !star.held && (
-      star.ambientMover || (star.launched && star.collisionMotion)
-    )).length;
+    let count = 0;
+    for (const star of stars) {
+      if (!star.userThrown && !star.held && (star.ambientMover || (star.launched && star.collisionMotion))) count += 1;
+    }
+    return count;
+  }
+
+  function applyCollisionVelocity(star, vx, vy, direction, nx, ny) {
+    const speed = Math.hypot(vx, vy);
+    const alreadyCounted = !star.userThrown && !star.held && (star.ambientMover || (star.launched && star.collisionMotion));
+    const atMovingLimit = countAutonomousMovers() >= MAX_MOVING_STARS && !alreadyCounted && !star.userThrown;
+    const settles = atMovingLimit || Math.random() < 0.22;
+    const cruiseSpeed = settles ? speed : Math.max(speed, 0.9);
+    const angle = speed > 0.001 ? Math.atan2(vy, vx) : Math.atan2(ny * direction, nx * direction);
+
+    star.ambientMover = false;
+    star.vx = Math.cos(angle) * cruiseSpeed;
+    star.vy = Math.sin(angle) * cruiseSpeed;
+    star.collisionMotion = true;
+    star.collisionSettled = false;
+    star.settleAfterCollision = settles;
+    if (settles && cruiseSpeed < 0.18) {
+      star.launched = false;
+      star.vx = 0;
+      star.vy = 0;
+      star.collisionMotion = false;
+      star.collisionSettled = true;
+    } else {
+      star.launched = true;
+    }
   }
 
   function makeStar(randomY = true) {
+    const star = starPool.pop() || { trail: Array.from({ length: TRAIL_LENGTH }, () => ({ x: 0, y: 0 })) };
     const radius = 1.9 + Math.random() * 1.6;
     const position = balancedPosition(randomY);
-    return {
-      x: position.x,
-      y: position.y,
-      radius,
-      speed: 0.65 + Math.random() * 0.55,
-      drift: (Math.random() - 0.5) * 0.55,
-      vx: 0,
-      vy: 0,
-      collisionMotion: false,
-      collisionSettled: false,
-      settleAfterCollision: false,
-      trail: [],
-      launched: false,
-      userThrown: false,
-      ambientMover: countAutonomousMovers() < MAX_MOVING_STARS,
-      phase: Math.random() * Math.PI * 2,
-      colors: palette[Math.floor(Math.random() * palette.length)],
-      held: false,
-    };
+    star.x = position.x;
+    star.y = position.y;
+    star.radius = radius;
+    star.speed = 0.65 + Math.random() * 0.55;
+    star.drift = (Math.random() - 0.5) * 0.55;
+    star.vx = 0;
+    star.vy = 0;
+    star.collisionMotion = false;
+    star.collisionSettled = false;
+    star.settleAfterCollision = false;
+    star.trailCount = 0;
+    star.launched = false;
+    star.userThrown = false;
+    star.ambientMover = countAutonomousMovers() < MAX_MOVING_STARS;
+    star.phase = Math.random() * Math.PI * 2;
+    star.colors = palette[Math.floor(Math.random() * palette.length)];
+    star.held = false;
+    return star;
+  }
+
+  function recycleStar(star) {
+    if (activeStar === star) activeStar = null;
+    star.held = false;
+    star.ambientMover = false;
+    star.launched = false;
+    star.userThrown = false;
+    star.collisionMotion = false;
+    star.collisionSettled = false;
+    star.settleAfterCollision = false;
+    star.trailCount = 0;
+    if (starPool.length < MAX_ACTIVE_STARS) starPool.push(star);
+  }
+
+  function scheduleResize() {
+    if (resizeFrame) return;
+    resizeFrame = window.requestAnimationFrame(() => {
+      resizeFrame = 0;
+      resize();
+    });
   }
 
   function resize() {
@@ -346,8 +410,8 @@
     canvas.style.height = `${height}px`;
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     targetCount = width <= 640 ? 27 : Math.min(60, Math.max(35, Math.round((width * height) / 14500)));
-    while (stars.length < targetCount) stars.push(makeStar());
-    while (stars.length > targetCount) stars.pop();
+    while (stars.length < targetCount && stars.length < MAX_ACTIVE_STARS) stars.push(makeStar());
+    while (stars.length > targetCount) recycleStar(stars.pop());
     ensureAmbientMovers();
   }
 
@@ -360,7 +424,7 @@
         movingCount += 1;
       }
     }
-    while (movingCount < MAX_MOVING_STARS && stars.length < targetCount + MAX_EXTRA_STARS) {
+    while (movingCount < MAX_MOVING_STARS && stars.length < targetCount + MAX_EXTRA_STARS && stars.length < MAX_ACTIVE_STARS) {
       const star = makeStar(false);
       star.ambientMover = true;
       stars.push(star);
@@ -376,14 +440,14 @@
     context.shadowColor = star.colors.edge;
     context.shadowBlur = star.held ? 30 : 17;
     const visibleTrail = star.trail;
-    if (visibleTrail.length > 1) {
-      const tail = visibleTrail[visibleTrail.length - 1];
+    if (star.trailCount > 1) {
+      const tail = visibleTrail[star.trailCount - 1];
       const trailGradient = context.createLinearGradient(star.x, star.y, tail.x, tail.y);
       trailGradient.addColorStop(0, star.colors.tail);
       trailGradient.addColorStop(1, "rgba(130, 170, 255, 0)");
       context.beginPath();
       context.moveTo(star.x, star.y);
-      for (let i = 0; i < visibleTrail.length; i += 1) {
+      for (let i = 0; i < star.trailCount; i += 1) {
         context.lineTo(visibleTrail[i].x, visibleTrail[i].y);
       }
       context.strokeStyle = star.held ? star.colors.tail : trailGradient;
@@ -443,8 +507,8 @@
           second.x += nx * overlap;
           second.y += ny * overlap;
         }
-        if (firstMoves) first.trail.length = 0;
-        if (secondMoves) second.trail.length = 0;
+        if (firstMoves) first.trailCount = 0;
+        if (secondMoves) second.trailCount = 0;
 
         const motionScale = reducedMotion.matches ? 0.55 : 1;
         const firstVx = first.launched ? first.vx : first.ambientMover
@@ -467,33 +531,8 @@
         const secondAfterX = secondVx + (impulse / secondMass) * nx;
         const secondAfterY = secondVy + (impulse / secondMass) * ny;
 
-        for (const [star, vx, vy, direction] of [
-          [first, firstAfterX, firstAfterY, -1],
-          [second, secondAfterX, secondAfterY, 1],
-        ]) {
-          const speed = Math.hypot(vx, vy);
-          const alreadyCounted = !star.userThrown && !star.held && (star.ambientMover || (star.launched && star.collisionMotion));
-          const atMovingLimit = countAutonomousMovers() >= MAX_MOVING_STARS && !alreadyCounted && !star.userThrown;
-          const settles = atMovingLimit || Math.random() < 0.22;
-          const cruiseSpeed = settles ? speed : Math.max(speed, 0.9);
-          const angle = speed > 0.001 ? Math.atan2(vy, vx) : Math.atan2(ny * direction, nx * direction);
-
-          star.ambientMover = false;
-          star.vx = Math.cos(angle) * cruiseSpeed;
-          star.vy = Math.sin(angle) * cruiseSpeed;
-          star.collisionMotion = true;
-          star.collisionSettled = false;
-          star.settleAfterCollision = settles;
-          if (settles && cruiseSpeed < 0.18) {
-            star.launched = false;
-            star.vx = 0;
-            star.vy = 0;
-            star.collisionMotion = false;
-            star.collisionSettled = true;
-          } else {
-            star.launched = true;
-          }
-        }
+        applyCollisionVelocity(first, firstAfterX, firstAfterY, -1, nx, ny);
+        applyCollisionVelocity(second, secondAfterX, secondAfterY, 1, nx, ny);
       }
     }
   }
@@ -573,10 +612,11 @@
           star.settleAfterCollision = false;
           star.vx = 0;
           star.vy = 0;
-          star.trail.length = 0;
+          star.trailCount = 0;
         }
         if (star.x < -24 || star.x > width + 24 || star.y < -24 || star.y > height + 24) {
           stars.splice(i, 1);
+          recycleStar(star);
           continue;
         }
       } else if (star.ambientMover) {
@@ -588,25 +628,30 @@
         if (star.y > height + 24) {
           star.y = -24;
           star.x = Math.random() * width;
-          star.trail.length = 0;
+          star.trailCount = 0;
         }
         if (star.x < -24) {
           star.x = width + 24;
-          star.trail.length = 0;
+          star.trailCount = 0;
         }
         if (star.x > width + 24) {
           star.x = -24;
-          star.trail.length = 0;
+          star.trailCount = 0;
         }
       }
-      if (star.trail.length === 0 || Math.hypot(star.x - star.trail[0].x, star.y - star.trail[0].y) > 2) {
-        star.trail.unshift({ x: star.x, y: star.y });
-        if (star.trail.length > 10) star.trail.pop();
+      if (star.trailCount === 0 || Math.hypot(star.x - star.trail[0].x, star.y - star.trail[0].y) > 2) {
+        for (let trailIndex = Math.min(star.trailCount, TRAIL_LENGTH - 1); trailIndex > 0; trailIndex -= 1) {
+          star.trail[trailIndex].x = star.trail[trailIndex - 1].x;
+          star.trail[trailIndex].y = star.trail[trailIndex - 1].y;
+        }
+        star.trail[0].x = star.x;
+        star.trail[0].y = star.y;
+        star.trailCount = Math.min(star.trailCount + 1, TRAIL_LENGTH);
       }
       drawStar(star, time);
     }
     resolveCollisions(time);
-    while (stars.length < targetCount) stars.push(makeStar());
+    while (stars.length < targetCount && stars.length < MAX_ACTIVE_STARS) stars.push(makeStar());
     ensureAmbientMovers();
     if (running) animationFrame = window.requestAnimationFrame(frame);
   }
@@ -673,11 +718,21 @@
     }
   }
 
+  function scheduleDragMove(x, y) {
+    dragMoveX = x;
+    dragMoveY = y;
+    if (dragMoveFrame) return;
+    dragMoveFrame = window.requestAnimationFrame(() => {
+      dragMoveFrame = 0;
+      moveActiveStar(dragMoveX, dragMoveY);
+    });
+  }
+
   function onPointerMove(event) {
     if (touchInputActive && event.pointerType === "touch") return;
     if (!activeStar) return;
     const { x, y } = localPoint(event);
-    moveActiveStar(x, y);
+    scheduleDragMove(x, y);
   }
 
   function onTouchStart(event) {
@@ -712,7 +767,7 @@
     if (!activeStar) return;
     const touch = event.touches[0];
     if (!touch) return;
-    moveActiveStar(touch.clientX, touch.clientY);
+    scheduleDragMove(touch.clientX, touch.clientY);
     event.preventDefault();
   }
 
@@ -725,6 +780,9 @@
   }
 
   function onPointerUp() {
+    if (dragMoveFrame && activeStar) moveActiveStar(dragMoveX, dragMoveY);
+    if (dragMoveFrame) window.cancelAnimationFrame(dragMoveFrame);
+    dragMoveFrame = 0;
     document.body.classList.remove("is-star-dragging");
     if (!activeStar) return;
     activeStar.held = false;
@@ -733,15 +791,24 @@
     if (!activeStar.launched) {
       activeStar.vx = 0;
       activeStar.vy = 0;
-      activeStar.trail.length = 0;
+      activeStar.trailCount = 0;
     }
     activeStar = null;
   }
 
   if (!reducedMotion.matches) {
+    let pointerVisualFrame = 0;
+    let pointerVisualX = 0;
+    let pointerVisualY = 0;
     window.addEventListener("pointermove", (event) => {
-      document.documentElement.style.setProperty("--pointer-x", `${event.clientX}px`);
-      document.documentElement.style.setProperty("--pointer-y", `${event.clientY}px`);
+      pointerVisualX = event.clientX;
+      pointerVisualY = event.clientY;
+      if (pointerVisualFrame) return;
+      pointerVisualFrame = window.requestAnimationFrame(() => {
+        pointerVisualFrame = 0;
+        document.documentElement.style.setProperty("--pointer-x", `${pointerVisualX}px`);
+        document.documentElement.style.setProperty("--pointer-y", `${pointerVisualY}px`);
+      });
     }, { passive: true });
   }
 
@@ -990,7 +1057,7 @@
   });
 
   resize();
-  window.addEventListener("resize", resize, { passive: true });
+  window.addEventListener("resize", scheduleResize, { passive: true });
   document.addEventListener("pointerdown", onPointerDown);
   document.addEventListener("pointermove", onPointerMove, { passive: true });
   document.addEventListener("pointerup", onPointerUp);
