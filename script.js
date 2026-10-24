@@ -278,6 +278,8 @@
   });
   const desktopQuery = window.matchMedia("(min-width: 1024px)");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const latencySamples = [10, 12, 11, 14];
+  let latencyIndex = 1;
   let clockTimer = 0;
   let latencyTimer = 0;
 
@@ -294,20 +296,31 @@
     istClock.dateTime = now.toISOString();
   }
 
+  function scheduleLatency() {
+    if (!latencyValue || document.hidden || !desktopQuery.matches) return;
+    latencyTimer = window.setTimeout(() => {
+      latencyValue.classList.add("is-updating");
+      latencyTimer = window.setTimeout(() => {
+        latencyIndex = (latencyIndex + 1) % latencySamples.length;
+        latencyValue.textContent = String(latencySamples[latencyIndex]);
+        latencyValue.classList.remove("is-updating");
+        latencyTimer = 0;
+        scheduleLatency();
+      }, 140);
+    }, 3000 + Math.random() * 2000);
+  }
+
   function startClock() {
-    if (document.hidden || !desktopQuery.matches || clockTimer || latencyTimer) return;
+    if (document.hidden || !desktopQuery.matches || clockTimer) return;
     updateClock();
     clockTimer = window.setInterval(updateClock, 1000);
-    if (latencyValue) {
-      latencyTimer = window.setInterval(() => {
-        latencyValue.textContent = String(11 + Math.floor(Math.random() * 4));
-      }, 2800);
-    }
+    scheduleLatency();
   }
 
   function stopClock() {
     window.clearInterval(clockTimer);
-    window.clearInterval(latencyTimer);
+    window.clearTimeout(latencyTimer);
+    latencyValue?.classList.remove("is-updating");
     clockTimer = 0;
     latencyTimer = 0;
   }
